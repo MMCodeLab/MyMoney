@@ -17,9 +17,10 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{ margin:0;padding:0; touch-action:manipulation; }
   body{
-    background:linear-gradient(-45deg, #e9f0ff, #f1e9ff, #e9fff5, #fff2e9);
-    background-size:400% 400%;
-    animation:auroraShift 22s ease infinite;
+    background:linear-gradient(-45deg, #eef2fb, #f2eefb, #eefbf4, #fbf3ee);
+    background-size:300% 300%;
+    background-attachment:fixed;
+    animation:auroraShift 26s ease infinite;
     font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color:var(--text);
     -webkit-font-smoothing:antialiased;
@@ -37,9 +38,9 @@
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
-    background:rgba(242,242,242,0.55);
-    backdrop-filter:blur(2px);
-    -webkit-backdrop-filter:blur(2px);
+    background:rgba(242,242,242,0.82);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
     position:relative;
     overflow-x:hidden;
     padding-bottom:120px;
@@ -474,11 +475,19 @@
   .card-holder{ font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; opacity:.85; }
   .card-hint{ font-size:10px; opacity:.7; font-weight:600; }
 
-  .card-back{ transform:rotateY(180deg); background:linear-gradient(135deg,#232526,#3d4045); }
+  .card-back{ transform:rotateY(180deg); background:linear-gradient(135deg,#232526,#3d4045); justify-content:flex-start; }
   .card-back-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; opacity:.75; font-weight:700; }
   .card-back-amount{ font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; margin-top:4px; }
   .card-back-amount.debt{ color:#FF6B6B; }
-  .card-back-hint{ font-size:10.5px; opacity:.65; }
+  .card-currency-converted{ font-size:13px; font-weight:700; opacity:.85; margin-top:5px; min-height:16px; }
+  .card-currency-row{ display:flex; gap:6px; overflow-x:auto; margin-top:10px; }
+  .fx-chip{
+    flex:0 0 auto; padding:5px 11px; border-radius:999px;
+    border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.12);
+    color:#fff; font-size:11px; font-weight:700;
+  }
+  .fx-chip.selected{ background:#fff; color:#232526; border-color:#fff; }
+  .card-back-hint{ font-size:10.5px; opacity:.65; margin-top:auto; padding-top:8px; }
 
   .savings-section{
     background:rgba(255,255,255,0.5); backdrop-filter:blur(16px) saturate(180%);

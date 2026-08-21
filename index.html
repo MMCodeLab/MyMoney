@@ -192,6 +192,8 @@
         <div class="card-face card-back" id="cardBack">
           <div class="card-back-label">Saldo attuale</div>
           <div class="card-back-amount" id="cardBackAmount">€0,00</div>
+          <div class="card-currency-converted" id="cardCurrencyConverted"></div>
+          <div class="card-currency-row" id="cardCurrencyRow"></div>
           <div class="card-back-hint">Tocca per tornare al davanti</div>
         </div>
       </div>
@@ -288,7 +290,8 @@
     pendingDeleteId: null,
     detailType: null,
     customCards: [],
-    calendarSelectedDate: null
+    calendarSelectedDate: null,
+    lastModalBalance: 0
   };
 
   // ---------- persistence ----------
@@ -816,6 +819,74 @@
     reader.readAsText(file);
   });
 
+  // ---------- cambio valuta (Frankfurter API, gratuita, senza chiave) ----------
+  var STORAGE_KEY_FX = "portafoglio_fx_cache_v1";
+  var FX_CURRENCIES = ["USD","GBP","CHF","JPY"];
+  var FX_SYMBOLS = {USD:"$", GBP:"£", CHF:"CHF ", JPY:"¥"};
+  var fxState = { rates:null, selected:"USD" };
+
+  function loadFxCache(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY_FX);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function saveFxCache(obj){
+    try{ localStorage.setItem(STORAGE_KEY_FX, JSON.stringify(obj)); }
+    catch(e){ /* storage unavailable */ }
+  }
+  function renderFxChips(){
+    var row = document.getElementById("cardCurrencyRow");
+    if(!row) return;
+    row.innerHTML = "";
+    FX_CURRENCIES.forEach(function(cur){
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "fx-chip" + (cur===fxState.selected ? " selected" : "");
+      chip.textContent = cur;
+      chip.addEventListener("click", function(){
+        fxState.selected = cur;
+        renderFxChips();
+        renderFxConversion();
+      });
+      row.appendChild(chip);
+    });
+  }
+  function renderFxConversion(){
+    var wrap = document.getElementById("cardCurrencyConverted");
+    if(!wrap) return;
+    if(!fxState.rates || !fxState.rates[fxState.selected]){
+      wrap.textContent = "";
+      return;
+    }
+    var rate = fxState.rates[fxState.selected];
+    var converted = state.lastModalBalance * rate;
+    var sym = FX_SYMBOLS[fxState.selected] || (fxState.selected + " ");
+    var sign = converted < 0 ? "-" : "";
+    wrap.textContent = "≈ " + sign + sym + Math.abs(converted).toLocaleString("it-IT", {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function ensureFxRates(){
+    var today = todayISO();
+    var cached = loadFxCache();
+    if(cached && cached.date===today && cached.base==="EUR"){
+      fxState.rates = cached.rates;
+      renderFxConversion();
+      return;
+    }
+    fetch("https://api.frankfurter.dev/v2/rates?base=EUR&quotes=" + FX_CURRENCIES.join(","))
+      .then(function(res){ if(!res.ok) throw new Error("fx"); return res.json(); })
+      .then(function(rows){
+        var rates = {};
+        rows.forEach(function(r){ rates[r.quote] = r.rate; });
+        fxState.rates = rates;
+        saveFxCache({date:today, base:"EUR", rates:rates});
+        renderFxConversion();
+      })
+      .catch(function(){
+        if(cached && cached.rates){ fxState.rates = cached.rates; renderFxConversion(); }
+      });
+  }
+
   // ---------- balance card modal (flip + risparmio) ----------
   var STORAGE_KEY_GOAL = "portafoglio_savings_goal_v1";
   var CARD_GRADIENTS = [
@@ -871,6 +942,10 @@
     var goal = loadSavingsGoal();
     document.getElementById("savingsGoalInput").value = goal>0 ? String(goal).replace(".", ",") : "";
     updateSavingsProgress(balance, goal);
+
+    state.lastModalBalance = balance;
+    renderFxChips();
+    ensureFxRates();
 
     document.getElementById("balanceModal").classList.add("show");
     showScrim();
