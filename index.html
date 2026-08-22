@@ -1,7 +1,18 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="theme-dark">
 <head>
 <meta charset="UTF-8">
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem("portafoglio_theme_v1");
+    if(t === "light"){
+      document.documentElement.classList.remove("theme-dark");
+      document.documentElement.classList.add("theme-light");
+    }
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -164,6 +175,12 @@
     <div class="sheet-title">Impostazioni</div>
     <button id="settingsClose">Chiudi</button>
   </div>
+  <div class="settings-section-label">Aspetto</div>
+  <div class="theme-toggle" id="themeToggle">
+    <button type="button" class="theme-toggle-btn" data-theme="dark">Scura</button>
+    <button type="button" class="theme-toggle-btn" data-theme="light">Chiara</button>
+  </div>
+
   <div class="settings-section-label">Le tue carte</div>
   <div class="cards-list" id="cardsList"></div>
   <div class="add-card-row">
@@ -844,7 +861,8 @@
       chip.type = "button";
       chip.className = "fx-chip" + (cur===fxState.selected ? " selected" : "");
       chip.textContent = cur;
-      chip.addEventListener("click", function(){
+      chip.addEventListener("click", function(e){
+        e.stopPropagation();
         fxState.selected = cur;
         renderFxChips();
         renderFxConversion();
@@ -1120,6 +1138,32 @@
     renderDetail();
   });
 
+  // ---------- tema scuro/chiaro ----------
+  var STORAGE_KEY_THEME = "portafoglio_theme_v1";
+  function getTheme(){
+    return document.documentElement.classList.contains("theme-light") ? "light" : "dark";
+  }
+  function setTheme(mode){
+    if(mode==="light"){
+      document.documentElement.classList.remove("theme-dark");
+      document.documentElement.classList.add("theme-light");
+    } else {
+      document.documentElement.classList.remove("theme-light");
+      document.documentElement.classList.add("theme-dark");
+    }
+    try{ localStorage.setItem(STORAGE_KEY_THEME, mode); }catch(e){}
+    renderThemeToggle();
+  }
+  function renderThemeToggle(){
+    var current = getTheme();
+    document.querySelectorAll(".theme-toggle-btn").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.theme===current);
+    });
+  }
+  document.querySelectorAll(".theme-toggle-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){ setTheme(btn.dataset.theme); });
+  });
+
   // ---------- settings: manage cards ----------
   var settingsSheet = document.getElementById("settingsSheet");
   function renderCardsList(){
@@ -1148,6 +1192,7 @@
   document.getElementById("settingsBtn").addEventListener("click", function(){
     closeAllOverlays();
     renderCardsList();
+    renderThemeToggle();
     settingsSheet.classList.add("show");
     showScrim();
     activeOverlay = "settings";

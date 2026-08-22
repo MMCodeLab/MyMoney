@@ -1,10 +1,4 @@
 :root{
-    --bg:#E7E7EA;
-    --sheet-bg:#F2F2F2;
-    --card:#FFFFFF;
-    --text:#1C1C1E;
-    --text-secondary:#8E8E93;
-    --hairline:rgba(60,60,67,0.12);
     --green:#34C759;
     --red:#FF3B30;
     --blue:#007AFF;
@@ -14,10 +8,28 @@
     --shadow-card:0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
     --shadow-float:0 8px 30px rgba(0,0,0,0.18);
   }
+  .theme-dark{
+    --bg1:#04120c; --bg2:#071b2e; --bg3:#0a2718; --bg4:#03080c;
+    --shell-bg:rgba(14,16,20,0.74);
+    --sheet-bg:#0b0d10;
+    --card:#15181c;
+    --text:#F2F2F5;
+    --text-secondary:#98A0A6;
+    --hairline:rgba(255,255,255,0.12);
+  }
+  .theme-light{
+    --bg1:#eef2fb; --bg2:#f2eefb; --bg3:#eefbf4; --bg4:#fbf3ee;
+    --shell-bg:rgba(242,242,242,0.82);
+    --sheet-bg:#F2F2F2;
+    --card:#FFFFFF;
+    --text:#1C1C1E;
+    --text-secondary:#8E8E93;
+    --hairline:rgba(60,60,67,0.12);
+  }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{ margin:0;padding:0; touch-action:manipulation; }
   body{
-    background:linear-gradient(-45deg, #eef2fb, #f2eefb, #eefbf4, #fbf3ee);
+    background:linear-gradient(-45deg, var(--bg1), var(--bg2), var(--bg3), var(--bg4));
     background-size:300% 300%;
     background-attachment:fixed;
     animation:auroraShift 26s ease infinite;
@@ -38,7 +50,7 @@
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
-    background:rgba(242,242,242,0.82);
+    background:var(--shell-bg);
     backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px);
     position:relative;
@@ -686,3 +698,41 @@
   @media (prefers-reduced-motion:reduce){
     *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
   }
+
+  /* ---------- Tema scuro: adatto le superfici di vetro (rimaste bianche di default) ---------- */
+  .theme-dark .icon-btn{ background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.14); }
+  .theme-dark .icon-btn:active{ background:rgba(255,255,255,0.16); }
+  .theme-dark .chart-card{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
+  .theme-dark .chart-card.income{ background:linear-gradient(165deg, rgba(255,255,255,0.07) 50%, rgba(52,199,89,0.16) 140%); }
+  .theme-dark .chart-card.expense{ background:linear-gradient(165deg, rgba(255,255,255,0.07) 50%, rgba(255,59,48,0.16) 140%); }
+  .theme-dark .donut-hole{ background:rgba(20,22,26,0.7); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .tx-card{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
+  .theme-dark .balance-card{ background:linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.04) 100%); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .seg-indicator{ background:#2c2f34; }
+  .theme-dark .segmented{ background:rgba(255,255,255,0.08); }
+  .theme-dark .type-choice, .theme-dark .subcat-btn{ box-shadow:0 1px 2px rgba(0,0,0,0.3); }
+  .theme-dark .fab-panel{ background:rgba(28,30,34,0.85); border:1px solid rgba(255,255,255,0.1); }
+  .theme-dark .action-sheet-card{ background:rgba(28,30,34,0.9); }
+  .theme-dark .action-sheet-card button{ border-bottom-color:rgba(255,255,255,0.1); }
+  .theme-dark .action-sheet-card button.action-cancel{ color:var(--text); }
+  .theme-dark .dropdown-menu{ background:rgba(28,30,34,0.85); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .dropdown-menu button{ border-bottom-color:rgba(255,255,255,0.1); }
+  .theme-dark .calendar-popup{ background:rgba(28,30,34,0.85); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .cal-day:active{ background:rgba(255,255,255,0.1); }
+  .theme-dark .balance-modal-panel{ background:rgba(28,30,34,0.8); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .balance-modal-close{ background:rgba(255,255,255,0.12); }
+  .theme-dark .savings-section{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
+  .theme-dark .savings-row input{ background:rgba(255,255,255,0.1); color:var(--text); }
+  .theme-dark .confirm-panel{ background:rgba(28,30,34,0.88); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .confirm-btn-cancel{ background:rgba(255,255,255,0.1); }
+  .theme-dark .card-select-chip{ background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.16); }
+  .theme-dark .card-row .card-chip-icon{ background:linear-gradient(135deg,#2c3e50,#4ca1af); }
+  .theme-dark .fx-chip{ background:rgba(255,255,255,0.1); }
+
+  /* ---------- Selettore Aspetto (Scura/Chiara) nelle impostazioni ---------- */
+  .theme-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .theme-toggle-btn{
+    flex:1; padding:10px; border-radius:12px; border:1.5px solid var(--hairline);
+    background:var(--card); color:var(--text); font-size:13.5px; font-weight:700;
+  }
+  .theme-toggle-btn.active{ background:var(--blue); border-color:var(--blue); color:#fff; }
