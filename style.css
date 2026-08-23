@@ -43,7 +43,7 @@
     50%{ background-position:100% 50%; }
     100%{ background-position:0% 50%; }
   }
-  button{font-family:inherit; cursor:pointer;}
+  button{font-family:inherit; cursor:pointer; color:inherit;}
   input{font-family:inherit;}
 
   .app-shell{
@@ -634,6 +634,62 @@
   .detail-chart-card .donut-total{ font-size:20px; }
   .detail-list{ padding:0 20px; }
 
+  /* ---------- Voce "Grafico" (entra nella pagina del grafico spese) ---------- */
+  .menu-entry-wrap{ padding:4px 20px 16px; animation:riseIn .6s cubic-bezier(.22,1,.36,1) both; animation-delay:.12s; }
+  .menu-entry{
+    display:flex; align-items:center; gap:12px; width:100%;
+    background:rgba(255,255,255,0.55); border-radius:var(--radius-md);
+    backdrop-filter:blur(18px) saturate(190%); -webkit-backdrop-filter:blur(18px) saturate(190%);
+    border:1px solid rgba(255,255,255,0.5);
+    box-shadow:var(--shadow-card);
+    padding:14px 16px; text-align:left;
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  .menu-entry:active{ transform:scale(0.98); }
+  .menu-entry-icon{
+    width:36px; height:36px; border-radius:10px; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,122,255,0.14); color:var(--blue);
+  }
+  .menu-entry-icon svg{ width:18px; height:18px; }
+  .menu-entry-label{ flex:1; font-size:15px; font-weight:600; color:var(--text); }
+  .menu-entry-chevron{ color:var(--text-secondary); font-size:16px; }
+
+  /* ---------- Pagina Grafico spese giornaliere ---------- */
+  .chart-range-row{ display:flex; gap:8px; padding:0 20px 14px; }
+  .range-chip{
+    flex:1; padding:9px 4px; border-radius:10px; border:1.5px solid var(--hairline);
+    background:var(--card); color:var(--text); font-size:13px; font-weight:700; text-align:center;
+  }
+  .range-chip.active{ background:var(--blue); border-color:var(--blue); color:#fff; }
+
+  /* ---------- Hero (totale / giorno selezionato) ---------- */
+  .chart-hero{ padding:2px 20px 22px; animation:riseIn .5s cubic-bezier(.22,1,.36,1) both; }
+  .chart-hero-label{ font-size:12.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; min-height:16px; }
+  .chart-hero-value{ font-size:40px; font-weight:800; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; color:var(--text); margin-top:4px; transition:opacity .15s ease; }
+  .chart-hero-sub{ font-size:13.5px; font-weight:600; color:var(--text-secondary); margin-top:6px; min-height:17px; }
+
+  /* ---------- Grafico a linee ---------- */
+  .line-chart-card{
+    margin:0 20px 26px; background:var(--card); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card); padding:20px 4px 14px;
+    animation:riseIn .6s cubic-bezier(.22,1,.36,1) both; animation-delay:.06s;
+  }
+  .line-chart-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .line-chart-svg{ display:block; }
+  .lc-stop-start{ stop-color:var(--red); stop-opacity:0.32; }
+  .lc-stop-end{ stop-color:var(--red); stop-opacity:0; }
+  .lc-area{ fill:url(#lcAreaGrad); }
+  .lc-line{ fill:none; stroke:var(--red); stroke-width:2.75; stroke-linecap:round; stroke-linejoin:round; }
+  .lc-dot{ fill:var(--sheet-bg); stroke:var(--red); stroke-width:2; }
+  .lc-dot-selected{ fill:var(--red); stroke:var(--card); stroke-width:3; }
+  .lc-guide{ stroke:var(--text-secondary); stroke-width:1; stroke-dasharray:3,4; opacity:.55; }
+  .lc-avg-line{ stroke:var(--text-secondary); stroke-width:1; stroke-dasharray:2,4; opacity:.5; }
+  .lc-avg-label{ fill:var(--text-secondary); font-size:9.5px; font-weight:700; }
+  .lc-axis-label{ fill:var(--text-secondary); font-size:10px; font-weight:600; }
+  .lc-axis-label.month-mark{ fill:var(--text); font-weight:800; }
+  .lc-empty{ text-align:center; padding:50px 20px; color:var(--text-secondary); font-size:13.5px; font-weight:600; }
+
   /* ---------- Settings: cards ---------- */
   .settings-section-label{ font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.03em; margin:4px 0 8px; }
   .cards-list{ background:var(--card); border-radius:var(--radius-md); overflow:hidden; margin-bottom:14px; }
@@ -728,6 +784,8 @@
   .theme-dark .card-select-chip{ background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.16); }
   .theme-dark .card-row .card-chip-icon{ background:linear-gradient(135deg,#2c3e50,#4ca1af); }
   .theme-dark .fx-chip{ background:rgba(255,255,255,0.1); }
+  .theme-dark .sheet{ background:rgba(22,24,28,0.94); border-top-color:rgba(255,255,255,0.12); }
+  .theme-dark .menu-entry{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
 
   /* ---------- Selettore Aspetto (Scura/Chiara) nelle impostazioni ---------- */
   .theme-toggle{ display:flex; gap:8px; margin-bottom:16px; }

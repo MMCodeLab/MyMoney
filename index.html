@@ -83,6 +83,14 @@
   </div>
 
   <section class="list-wrap" id="listWrap"></section>
+
+  <section class="menu-entry-wrap">
+    <button class="menu-entry" id="chartEntryBtn" type="button" aria-label="Apri grafico spese giornaliere">
+      <span class="menu-entry-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="16"></line><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line></svg></span>
+      <span class="menu-entry-label">Grafico</span>
+      <span class="menu-entry-chevron">&#8250;</span>
+    </button>
+  </section>
 </div>
 
 <button class="fab" id="fabBtn" aria-label="Aggiungi movimento">+</button>
@@ -167,6 +175,28 @@
     <div class="legend" id="legendDetail"></div>
   </div>
   <div class="detail-list" id="detailList"></div>
+</div>
+
+<div class="detail-view" id="chartView">
+  <div class="detail-header">
+    <button class="detail-back" id="chartBack" aria-label="Indietro">&#8249;</button>
+    <div class="detail-title">Grafico spese</div>
+  </div>
+  <div class="chart-range-row" id="chartRangeRow">
+    <button class="range-chip active" data-range="7" type="button">7 giorni</button>
+    <button class="range-chip" data-range="30" type="button">30 giorni</button>
+    <button class="range-chip" data-range="all" type="button">Tutti</button>
+  </div>
+
+  <div class="chart-hero" id="chartHero">
+    <div class="chart-hero-label" id="chartHeroLabel">Totale nel periodo</div>
+    <div class="chart-hero-value" id="chartHeroValue">€0</div>
+    <div class="chart-hero-sub" id="chartHeroSub">&nbsp;</div>
+  </div>
+
+  <div class="line-chart-card">
+    <div class="line-chart-scroll" id="lineChartScroll"></div>
+  </div>
 </div>
 
 <div class="sheet" id="settingsSheet">
@@ -1136,6 +1166,259 @@
   document.getElementById("detailNextMonth").addEventListener("click", function(){
     state.period.m++; if(state.period.m>11){ state.period.m=0; state.period.y++; }
     renderDetail();
+  });
+
+  // ---------- grafico spese giornaliere ----------
+  var WEEKDAYS_IT_SHORT = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  var chartState = { range:"7", selectedIndex:null };
+
+  function dateKey(d){
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+m+"-"+day;
+  }
+  function buildDailySeries(range){
+    var end = new Date(); end.setHours(0,0,0,0);
+    var start;
+    if(range==="7" || range==="30"){
+      start = new Date(end);
+      start.setDate(start.getDate() - (parseInt(range,10)-1));
+    } else if(state.transactions.length===0){
+      start = new Date(end);
+    } else {
+      var minTime = Infinity;
+      state.transactions.forEach(function(t){
+        var time = new Date(t.date+"T00:00:00").getTime();
+        if(time < minTime) minTime = time;
+      });
+      start = new Date(minTime);
+    }
+    var totals = {};
+    state.transactions.forEach(function(t){
+      if(t.type!=="expense") return;
+      totals[t.date] = (totals[t.date]||0) + t.amount;
+    });
+    var days = [];
+    var cursor = new Date(start);
+    while(cursor.getTime() <= end.getTime()){
+      var key = dateKey(cursor);
+      days.push({
+        date:key,
+        day:cursor.getDate(),
+        weekday:(cursor.getDay()+6)%7,
+        isFirstOfMonth:cursor.getDate()===1,
+        month:cursor.getMonth(),
+        amount: totals[key]||0
+      });
+      cursor.setDate(cursor.getDate()+1);
+    }
+    return days;
+  }
+  var chartDays = [];
+  var chartPoints = [];
+  var chartDragging = false;
+
+  function renderChartHero(days){
+    var label = document.getElementById("chartHeroLabel");
+    var value = document.getElementById("chartHeroValue");
+    var sub = document.getElementById("chartHeroSub");
+    var total = 0;
+    days.forEach(function(d){ total += d.amount; });
+
+    if(chartState.selectedIndex!==null && days[chartState.selectedIndex]){
+      var sel = days[chartState.selectedIndex];
+      var dd = new Date(sel.date+"T00:00:00");
+      label.textContent = WEEKDAYS_IT_SHORT[sel.weekday]+" "+dd.getDate()+" "+MONTHS_IT[dd.getMonth()].toLowerCase();
+      value.textContent = fmtEUR(sel.amount);
+      sub.innerHTML = sel.amount>0 ? "&nbsp;" : "Nessuna spesa registrata";
+      return;
+    }
+    label.textContent = "Totale nel periodo";
+    if(days.length===0 || total<=0){
+      value.textContent = "€0";
+      sub.textContent = "Nessuna uscita in questo periodo";
+      return;
+    }
+    value.textContent = fmtEUR(total);
+    sub.textContent = "Media giornaliera "+fmtEUR(total/days.length);
+  }
+
+  function buildSmoothPath(pts, closeToBottom, bottomY){
+    var n = pts.length;
+    if(n===0) return "";
+    if(n===1){
+      return closeToBottom ? "" : "M "+pts[0].x+" "+pts[0].y;
+    }
+    var d = "M "+pts[0].x+" "+pts[0].y;
+    for(var i=0;i<n-1;i++){
+      var p0 = i===0 ? pts[0] : pts[i-1];
+      var p1 = pts[i];
+      var p2 = pts[i+1];
+      var p3 = (i+2<n) ? pts[i+2] : pts[n-1];
+      var cp1x = p1.x + (p2.x-p0.x)/6;
+      var cp1y = p1.y + (p2.y-p0.y)/6;
+      var cp2x = p2.x - (p3.x-p1.x)/6;
+      var cp2y = p2.y - (p3.y-p1.y)/6;
+      d += " C "+cp1x.toFixed(2)+" "+cp1y.toFixed(2)+" "+cp2x.toFixed(2)+" "+cp2y.toFixed(2)+" "+p2.x+" "+p2.y;
+    }
+    if(closeToBottom){
+      var last = pts[n-1];
+      d += " L "+last.x+" "+bottomY+" L "+pts[0].x+" "+bottomY+" Z";
+    }
+    return d;
+  }
+
+  function updateSelectionVisual(idx){
+    var p = chartPoints[idx];
+    var group = document.getElementById("lcSelection");
+    if(!p || !group) return;
+    document.getElementById("lcGuideLine").setAttribute("x1", p.x);
+    document.getElementById("lcGuideLine").setAttribute("x2", p.x);
+    document.getElementById("lcSelectedDot").setAttribute("cx", p.x);
+    document.getElementById("lcSelectedDot").setAttribute("cy", p.y);
+    group.style.display = "block";
+  }
+  function clearSelectionVisual(){
+    var group = document.getElementById("lcSelection");
+    if(group) group.style.display = "none";
+  }
+
+  function renderLineChart(){
+    chartDays = buildDailySeries(chartState.range);
+    renderChartHero(chartDays);
+
+    var scrollWrap = document.getElementById("lineChartScroll");
+    var hasData = chartDays.some(function(d){ return d.amount>0; });
+    if(!hasData){
+      scrollWrap.innerHTML = '<div class="lc-empty">Nessuna spesa da mostrare</div>';
+      chartPoints = [];
+      return;
+    }
+
+    var n = chartDays.length;
+    var containerWidth = scrollWrap.clientWidth || 390;
+    var minPxPerPoint = chartState.range==="7" ? null : (chartState.range==="30" ? 15 : 7);
+    var padL = 10, padR = 10, padTop = 24, padBottom = 26, plotH = 168;
+    var svgHeight = padTop + plotH + padBottom;
+    var svgWidth = (minPxPerPoint===null || n<=1) ? containerWidth : Math.max(containerWidth, padL+padR+(n-1)*minPxPerPoint);
+
+    var max = 0, total = 0;
+    chartDays.forEach(function(d){ if(d.amount>max) max = d.amount; total += d.amount; });
+    var plotMax = max>0 ? max*1.18 : 1;
+    var avg = total/n;
+    var innerW = svgWidth - padL - padR;
+    var stepX = n>1 ? innerW/(n-1) : 0;
+
+    chartPoints = chartDays.map(function(d, i){
+      var x = Math.round((padL + i*stepX)*100)/100;
+      var y = Math.round((padTop + plotH - (d.amount/plotMax)*plotH)*100)/100;
+      return {x:x, y:y, amount:d.amount};
+    });
+
+    var linePath = buildSmoothPath(chartPoints, false, 0);
+    var areaPath = buildSmoothPath(chartPoints, true, padTop+plotH);
+    var avgY = Math.round((padTop + plotH - (avg/plotMax)*plotH)*100)/100;
+
+    var svg = '<svg id="lineChartSvg" class="line-chart-svg" width="'+svgWidth+'" height="'+svgHeight+'" viewBox="0 0 '+svgWidth+' '+svgHeight+'">';
+    svg += '<defs><linearGradient id="lcAreaGrad" x1="0" y1="0" x2="0" y2="1">'+
+           '<stop offset="0%" class="lc-stop-start"></stop>'+
+           '<stop offset="100%" class="lc-stop-end"></stop>'+
+           '</linearGradient></defs>';
+    if(avg>0){
+      svg += '<line class="lc-avg-line" x1="'+padL+'" y1="'+avgY+'" x2="'+(svgWidth-padR)+'" y2="'+avgY+'"></line>';
+      svg += '<text class="lc-avg-label" x="'+padL+'" y="'+(avgY-6)+'">media '+fmtEUR(avg).replace(",00","")+'</text>';
+    }
+    svg += '<path class="lc-area" d="'+areaPath+'"></path>';
+    svg += '<path class="lc-line" d="'+linePath+'"></path>';
+    if(n<=14){
+      chartPoints.forEach(function(p){
+        svg += '<circle class="lc-dot" cx="'+p.x+'" cy="'+p.y+'" r="3.5"></circle>';
+      });
+    }
+
+    var labelCount = Math.min(n, chartState.range==="7" ? 7 : 6);
+    var labelIdxs = [], li;
+    if(labelCount<=1){ labelIdxs=[0]; }
+    else { for(li=0; li<labelCount; li++){ labelIdxs.push(Math.round(li*(n-1)/(labelCount-1))); } }
+    var seenIdx = {};
+    labelIdxs.forEach(function(idx){
+      if(seenIdx[idx]) return; seenIdx[idx]=true;
+      var d = chartDays[idx], p = chartPoints[idx], text, cls="lc-axis-label";
+      if(chartState.range==="7"){ text = WEEKDAYS_IT_SHORT[d.weekday]+" "+d.day; }
+      else if(d.isFirstOfMonth){ text = MONTHS_IT[d.month].slice(0,3); cls += " month-mark"; }
+      else { text = String(d.day); }
+      var anchor = idx===0 ? "start" : (idx===n-1 ? "end" : "middle");
+      svg += '<text class="'+cls+'" x="'+p.x+'" y="'+(svgHeight-8)+'" text-anchor="'+anchor+'">'+text+'</text>';
+    });
+
+    svg += '<g id="lcSelection" style="display:none">'+
+           '<line class="lc-guide" id="lcGuideLine" x1="0" y1="'+padTop+'" x2="0" y2="'+(padTop+plotH)+'"></line>'+
+           '<circle class="lc-dot-selected" id="lcSelectedDot" cx="0" cy="0" r="5"></circle>'+
+           '</g>';
+    svg += '</svg>';
+
+    scrollWrap.innerHTML = svg;
+    if(chartState.selectedIndex!==null && chartPoints[chartState.selectedIndex]){
+      updateSelectionVisual(chartState.selectedIndex);
+    }
+    if(minPxPerPoint!==null) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
+  }
+
+  function handleChartPointer(clientX, isNewPress){
+    if(chartPoints.length===0) return;
+    var svg = document.getElementById("lineChartSvg");
+    if(!svg) return;
+    var rect = svg.getBoundingClientRect();
+    var localX = clientX - rect.left;
+    var nearest = 0, bestDist = Infinity;
+    chartPoints.forEach(function(p, i){
+      var dist = Math.abs(p.x - localX);
+      if(dist < bestDist){ bestDist = dist; nearest = i; }
+    });
+    if(isNewPress && chartState.selectedIndex===nearest){
+      chartState.selectedIndex = null;
+      clearSelectionVisual();
+      renderChartHero(chartDays);
+      return;
+    }
+    if(chartState.selectedIndex!==nearest){
+      chartState.selectedIndex = nearest;
+      updateSelectionVisual(nearest);
+      renderChartHero(chartDays);
+    }
+  }
+
+  (function(){
+    var wrap = document.getElementById("lineChartScroll");
+    wrap.addEventListener("pointerdown", function(e){
+      chartDragging = true;
+      handleChartPointer(e.clientX, true);
+    });
+    wrap.addEventListener("pointermove", function(e){
+      if(chartDragging) handleChartPointer(e.clientX, false);
+    });
+    window.addEventListener("pointerup", function(){ chartDragging = false; });
+    window.addEventListener("pointercancel", function(){ chartDragging = false; });
+  })();
+
+  function openChartView(){
+    closeAllOverlays();
+    chartState.selectedIndex = null;
+    renderLineChart();
+    document.getElementById("chartView").classList.add("show");
+  }
+  function closeChartView(){
+    document.getElementById("chartView").classList.remove("show");
+  }
+  document.getElementById("chartEntryBtn").addEventListener("click", openChartView);
+  document.getElementById("chartBack").addEventListener("click", closeChartView);
+  document.getElementById("chartRangeRow").addEventListener("click", function(e){
+    var btn = e.target.closest(".range-chip");
+    if(!btn || btn.classList.contains("active")) return;
+    document.querySelectorAll(".range-chip").forEach(function(b){ b.classList.toggle("active", b===btn); });
+    chartState.range = btn.dataset.range;
+    chartState.selectedIndex = null;
+    renderLineChart();
   });
 
   // ---------- tema scuro/chiaro ----------
