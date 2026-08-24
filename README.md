@@ -1,0 +1,57 @@
+# MyMoney
+
+<p align="center">
+  <img src="icons/icon-512.png" width="160" alt="MyMoney">
+</p>
+
+<h3 align="center">Il tuo portafoglio digitale.</h3>
+
+<p align="center">
+  Tieni traccia di entrate e uscite, tutto salvato sul tuo dispositivo.
+</p>
+
+---
+
+## Cos'è
+
+**MyMoney** è una Progressive Web App (PWA) personale per tenere sotto controllo le proprie finanze quotidiane: entrate, uscite e categorie di spesa, in un'interfaccia semplice e veloce da usare ogni giorno.
+
+## Funzionalità principali
+
+- Registrazione rapida di **entrate e uscite**, suddivise per categoria.
+- Riepilogo con **grafici** di entrate/uscite e andamento delle spese giornaliere.
+- **Conversione valuta** integrata, tramite API di cambio gratuita e senza chiave.
+- **Esportazione dati** in JSON per backup personale.
+- Installabile come app, con funzionamento offline.
+
+## Privacy e dati
+
+- Nessuna registrazione, nessun account.
+- Nessun tracciamento e nessuna raccolta dati personali.
+- Tutti i movimenti restano sul dispositivo, salvati in `localStorage`.
+- Esportazione manuale in JSON, sempre sotto il tuo controllo.
+
+## Tecnologie
+
+- HTML5, CSS3, JavaScript
+- `localStorage` per la persistenza dei dati
+- Progressive Web App: manifest + service worker per l'installazione e l'uso offline
+- [Frankfurter API](https://www.frankfurter.app/) per il cambio valuta in tempo reale (gratuita, senza chiave)
+
+## Come avviarla in locale
+
+Apri `index.html` con doppio click, oppure servilo con un qualsiasi server statico locale (es. estensione "Live Server" di VS Code) per abilitare l'installazione come PWA e il funzionamento offline via service worker.
+
+## Struttura del progetto
+
+```
+index.html            punto di ingresso e logica dell'app
+style.css               design system e temi
+ServiceWorker.js        service worker (funzionamento offline)
+manifest.json            manifest PWA (nome, icone, colori)
+icons/                    icone PWA
+```
+
+---
+
+Fa parte della famiglia di app **My**, insieme a MyVerse, MyGym, MySchool e MySite.
