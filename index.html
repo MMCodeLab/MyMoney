@@ -29,12 +29,10 @@
 <body>
 <div class="app-shell">
 
-  <header class="topbar">
-    <button class="icon-btn" id="calendarBtn" aria-label="Apri calendario">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><line x1="16" y1="3" x2="16" y2="7"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-    </button>
-    <div class="title">Portafoglio</div>
-    <button class="icon-btn" id="menuBtn" aria-label="Altre opzioni">&#8942;</button>
+  <header class="topbar glass">
+    <div class="topbar-inner">
+      <span class="brand"><img src="icons/icon-192.png" alt="" class="brand-mark" width="28" height="28" /><strong>MyMoney</strong></span>
+    </div>
   </header>
 
   <section class="balance-card" id="balanceCardBtn" role="button" tabindex="0" aria-label="Mostra carta">
@@ -83,15 +81,27 @@
   </div>
 
   <section class="list-wrap" id="listWrap"></section>
-
-  <section class="menu-entry-wrap">
-    <button class="menu-entry" id="chartEntryBtn" type="button" aria-label="Apri grafico spese giornaliere">
-      <span class="menu-entry-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="16"></line><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line></svg></span>
-      <span class="menu-entry-label">Grafico</span>
-      <span class="menu-entry-chevron">&#8250;</span>
-    </button>
-  </section>
 </div>
+
+<nav class="bottom-nav glass" id="bottomNav" aria-label="Navigazione principale">
+  <span class="nav-pill" id="navPill" aria-hidden="true"></span>
+  <button type="button" class="nav-item active" id="navHomeBtn" data-route="home">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg></span>
+    <span class="nav-label">Home</span>
+  </button>
+  <button type="button" class="nav-item" id="navCalendarBtn" data-route="calendario">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><line x1="16" y1="3" x2="16" y2="7"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span>
+    <span class="nav-label">Calendario</span>
+  </button>
+  <button type="button" class="nav-item" id="navChartBtn" data-route="grafico">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="16"></line><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line></svg></span>
+    <span class="nav-label">Grafico</span>
+  </button>
+  <button type="button" class="nav-item" id="navSettingsBtn" data-route="impostazioni">
+    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg></span>
+    <span class="nav-label">Impostazioni</span>
+  </button>
+</nav>
 
 <button class="fab" id="fabBtn" aria-label="Aggiungi movimento">+</button>
 
@@ -145,13 +155,6 @@
   </div>
   <div class="calendar-grid" id="calendarGrid"></div>
   <div class="calendar-day-detail" id="calendarDayDetail"></div>
-</div>
-
-<div class="dropdown-menu" id="dataMenu">
-  <button id="settingsBtn">Impostazioni</button>
-  <button id="exportBtn">Esporta dati (JSON)</button>
-  <button id="importBtn">Importa dati</button>
-  <button class="action-danger" id="resetBtn">Azzera tutti i dati</button>
 </div>
 
 <div class="detail-view" id="detailView">
@@ -217,6 +220,12 @@
     <input type="text" id="newCardInput" placeholder="Nome carta (es. Visa Revolut)" maxlength="24">
     <button id="addCardBtn">Aggiungi</button>
   </div>
+
+  <div class="settings-section-label">Dati</div>
+  <div class="settings-actions-list">
+    <button id="exportBtn">Esporta dati (JSON)</button>
+    <button id="importBtn">Importa dati</button>
+  </div>
 </div>
 
 <div class="balance-modal" id="balanceModal">
@@ -273,6 +282,20 @@
 </div>
 
 <input type="file" id="importFile" accept="application/json" hidden>
+<input type="file" id="receiptFileInput" accept="image/*" hidden>
+
+<div class="camera-overlay" id="cameraOverlay">
+  <div class="detail-header">
+    <button class="detail-back" id="cameraClose" aria-label="Chiudi">&#10005;</button>
+    <div class="detail-title">Scatta una foto</div>
+  </div>
+  <div class="camera-capture">
+    <video id="cameraVideo" class="camera-video" autoplay playsinline muted></video>
+    <p class="camera-error" id="cameraError" style="display:none"></p>
+  </div>
+  <button class="camera-shutter-btn" id="cameraShutter" aria-label="Scatta foto" disabled></button>
+</div>
+
 <div class="scrim" id="scrim"></div>
 
 <script>
@@ -329,7 +352,8 @@
     transactions: loadTransactions(),
     segment: "expense",
     period: (function(){ var d=new Date(); return {y:d.getFullYear(), m:d.getMonth()}; })(),
-    fabStep: 0, // 0 closed, 1 type choice, 2 subcategory choice
+    fabStep: 0, // 0 chiuso, 1 entrata/uscita, 2 categoria, 3 scansione in corso, 4 scelta scontrino/manuale, 5 scelta fotocamera/libreria
+    fabStack: [],
     fabType: null,
     pendingType: null,
     pendingCategory: null,
@@ -626,14 +650,31 @@
     closeFabPanel();
     closeSheet();
     document.getElementById("deleteSheet").classList.remove("show");
-    document.getElementById("dataMenu").classList.remove("show");
     document.getElementById("settingsSheet").classList.remove("show");
     document.getElementById("calendarPopup").classList.remove("show");
     document.getElementById("balanceModal").classList.remove("show");
     document.getElementById("expenseConfirmDialog").classList.remove("show");
+    stopCameraStream();
+    document.getElementById("cameraOverlay").classList.remove("show");
     hideScrim();
     activeOverlay = null;
+    setActiveNav("home");
   }
+
+  // ---------- bottom nav ----------
+  var NAV_ROUTES = ["home", "calendario", "grafico", "impostazioni"];
+  function setActiveNav(route){
+    var idx = NAV_ROUTES.indexOf(route);
+    if(idx===-1) return;
+    document.querySelectorAll(".nav-item").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.route===route);
+    });
+    document.getElementById("navPill").style.transform = "translateX(" + (idx*100) + "%)";
+  }
+  document.getElementById("navHomeBtn").addEventListener("click", function(){
+    closeAllOverlays();
+    window.scrollTo(0, 0);
+  });
 
   // ---------- FAB panel ----------
   var fabBtn = document.getElementById("fabBtn");
@@ -643,7 +684,7 @@
   var fabPanelBody = document.getElementById("fabPanelBody");
 
   function openFabPanel(){
-    state.fabStep = 1; state.fabType = null;
+    state.fabStep = 1; state.fabType = null; state.fabStack = [];
     renderFabStep();
     fabPanel.classList.add("show");
     fabBtn.classList.add("open");
@@ -659,8 +700,14 @@
     if(activeOverlay==="fab"){ closeAllOverlays(); }
     else { closeAllOverlays(); openFabPanel(); }
   });
+
+  function goFabStep(step){
+    state.fabStack.push(state.fabStep);
+    state.fabStep = step;
+    renderFabStep();
+  }
   fabBack.addEventListener("click", function(){
-    state.fabStep = 1; state.fabType = null;
+    state.fabStep = state.fabStack.length ? state.fabStack.pop() : 1;
     renderFabStep();
   });
 
@@ -671,14 +718,40 @@
       fabPanelTitle.textContent = "Aggiungi movimento";
       var incBtn = document.createElement("button");
       incBtn.className = "type-choice income";
-      incBtn.innerHTML = '<span class="swatch">&#8593;</span><span class="label">Entrata</span>';
-      incBtn.addEventListener("click", function(){ state.fabType="income"; state.fabStep=2; renderFabStep(); });
+      incBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="18" x2="18" y2="6"></line><polyline points="8 6 18 6 18 16"></polyline></svg></span><span class="label">Entrata</span>';
+      incBtn.addEventListener("click", function(){ state.fabType="income"; goFabStep(2); });
       var expBtn = document.createElement("button");
       expBtn.className = "type-choice expense";
-      expBtn.innerHTML = '<span class="swatch">&#8595;</span><span class="label">Uscita</span>';
-      expBtn.addEventListener("click", function(){ state.fabType="expense"; state.fabStep=2; renderFabStep(); });
+      expBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"></line><polyline points="18 8 18 18 8 18"></polyline></svg></span><span class="label">Uscita</span>';
+      expBtn.addEventListener("click", function(){ state.fabType="expense"; goFabStep(4); });
       fabPanelBody.appendChild(incBtn);
       fabPanelBody.appendChild(expBtn);
+    } else if(state.fabStep===4){
+      fabBack.hidden = false;
+      fabPanelTitle.textContent = "Nuova uscita";
+      var scanChoiceBtn = document.createElement("button");
+      scanChoiceBtn.className = "type-choice scan";
+      scanChoiceBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></span><span class="label">Scansiona scontrino</span>';
+      scanChoiceBtn.addEventListener("click", function(){ goFabStep(5); });
+      var manualBtn = document.createElement("button");
+      manualBtn.className = "type-choice manual";
+      manualBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></span><span class="label">Scegli categoria manualmente</span>';
+      manualBtn.addEventListener("click", function(){ goFabStep(2); });
+      fabPanelBody.appendChild(scanChoiceBtn);
+      fabPanelBody.appendChild(manualBtn);
+    } else if(state.fabStep===5){
+      fabBack.hidden = false;
+      fabPanelTitle.textContent = "Scansiona scontrino";
+      var cameraBtn = document.createElement("button");
+      cameraBtn.className = "type-choice scan";
+      cameraBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></span><span class="label">Scatta una foto</span>';
+      cameraBtn.addEventListener("click", function(){ closeFabPanel(); openCameraCapture(); });
+      var galleryBtn = document.createElement("button");
+      galleryBtn.className = "type-choice scan";
+      galleryBtn.innerHTML = '<span class="swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-5-5L5 21"></path></svg></span><span class="label">Carica una foto</span>';
+      galleryBtn.addEventListener("click", function(){ receiptFileInput.click(); });
+      fabPanelBody.appendChild(cameraBtn);
+      fabPanelBody.appendChild(galleryBtn);
     } else if(state.fabStep===2){
       fabBack.hidden = false;
       fabPanelTitle.textContent = state.fabType==="income" ? "Categoria entrata" : "Categoria uscita";
@@ -692,6 +765,13 @@
         grid.appendChild(b);
       });
       fabPanelBody.appendChild(grid);
+    } else if(state.fabStep===3){
+      fabBack.hidden = true;
+      fabPanelTitle.textContent = "Scansione scontrino";
+      var scanWrap = document.createElement("div");
+      scanWrap.className = "scan-loading";
+      scanWrap.innerHTML = '<span class="scan-spinner"></span><span class="scan-status" id="scanStatusText">Sto leggendo lo scontrino...</span>';
+      fabPanelBody.appendChild(scanWrap);
     }
   }
 
@@ -801,6 +881,189 @@
     document.getElementById("expenseConfirmDialog").classList.remove("show");
   });
 
+  // ---------- scansione scontrino (OCR nel browser + AI per interpretarlo) ----------
+  var AI_WORKER_URL = "https://mymoney.minnitijunior.workers.dev/";
+  var EXPENSE_CATEGORY_IDS = CATEGORIES.expense.map(function(c){ return c.id; });
+  var receiptFileInput = document.getElementById("receiptFileInput");
+
+  var tesseractLoadPromise = null;
+  function loadTesseract(){
+    if(window.Tesseract) return Promise.resolve();
+    if(tesseractLoadPromise) return tesseractLoadPromise;
+    tesseractLoadPromise = new Promise(function(resolve, reject){
+      var script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+      script.onload = function(){ resolve(); };
+      script.onerror = function(){ reject(new Error("Impossibile caricare il motore OCR.")); };
+      document.head.appendChild(script);
+    });
+    return tesseractLoadPromise;
+  }
+
+  function setScanStatus(text){
+    var el = document.getElementById("scanStatusText");
+    if(el) el.textContent = text;
+  }
+
+  // ---------- fotocamera live (getUserMedia), non l'attributo "capture" ----------
+  // A differenza di <input capture>, che su molti browser/PWA viene ignorato o
+  // mostra solo il selettore file, getUserMedia chiede davvero il permesso e
+  // apre un mirino live, esattamente come in MySchool.
+  var cameraStream = null;
+  var cameraOverlay = document.getElementById("cameraOverlay");
+  var cameraVideo = document.getElementById("cameraVideo");
+  var cameraShutter = document.getElementById("cameraShutter");
+  var cameraError = document.getElementById("cameraError");
+
+  function stopCameraStream(){
+    if(cameraStream){
+      cameraStream.getTracks().forEach(function(t){ t.stop(); });
+      cameraStream = null;
+    }
+  }
+
+  function openCameraCapture(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert("Fotocamera non supportata su questo browser: scegli una foto dalla libreria.");
+      return;
+    }
+    cameraVideo.style.display = "block";
+    cameraError.style.display = "none";
+    cameraShutter.disabled = true;
+    cameraOverlay.classList.add("show");
+    hideScrim();
+    activeOverlay = "camera";
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    }).then(function(stream){
+      cameraStream = stream;
+      cameraVideo.srcObject = stream;
+      cameraShutter.disabled = false;
+    }).catch(function(err){
+      cameraVideo.style.display = "none";
+      cameraError.style.display = "block";
+      cameraError.textContent = (err && err.name === "NotAllowedError")
+        ? "Permesso alla fotocamera negato. Puoi comunque scegliere una foto dalla libreria."
+        : "Impossibile accedere alla fotocamera su questo dispositivo.";
+    });
+  }
+
+  function closeCameraCapture(){
+    stopCameraStream();
+    cameraOverlay.classList.remove("show");
+    if(activeOverlay === "camera") activeOverlay = null;
+  }
+
+  document.getElementById("cameraClose").addEventListener("click", closeCameraCapture);
+  cameraShutter.addEventListener("click", function(){
+    var canvas = document.createElement("canvas");
+    canvas.width = cameraVideo.videoWidth;
+    canvas.height = cameraVideo.videoHeight;
+    canvas.getContext("2d").drawImage(cameraVideo, 0, 0);
+    canvas.toBlob(function(blob){
+      closeCameraCapture();
+      if(blob) startReceiptScan(blob);
+    }, "image/jpeg", 0.92);
+  });
+
+  function interpretReceiptText(text){
+    var systemPrompt = "Sei un assistente che estrae dati da scontrini italiani a partire da testo OCR " +
+      "(puo' contenere errori di riconoscimento). Rispondi SOLO con un oggetto JSON con questi campi: " +
+      "importo (numero, il totale pagato, es. 12.5), " +
+      "categoria (una tra: " + EXPENSE_CATEGORY_IDS.join(", ") + "), " +
+      "data (formato YYYY-MM-DD; se non presente nel testo usa null), " +
+      "nota (nome del negozio/esercizio, breve, o null). " +
+      "Se un campo non e' determinabile usa null. Non aggiungere testo fuori dal JSON.";
+
+    return fetch(AI_WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: text.slice(0, 4000) }
+        ],
+        response_format: { type: "json_object" }
+      })
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error("Richiesta AI fallita.");
+      return res.json();
+    })
+    .then(function(data){
+      var content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if(!content) throw new Error("Risposta AI vuota.");
+      try{ return JSON.parse(content); }
+      catch(e){ throw new Error("Risposta AI non valida."); }
+    });
+  }
+
+  function applyReceiptResult(parsed){
+    var categoryId = "altro_e";
+    if(parsed && parsed.categoria && catById("expense", parsed.categoria)){
+      categoryId = parsed.categoria;
+    }
+    openSheetForCategory("expense", categoryId);
+
+    var amount = parsed && parsed.importo!=null ? parseFloat(String(parsed.importo).replace(",", ".")) : NaN;
+    if(!isNaN(amount) && amount>0){
+      amountInput.value = amount.toFixed(2).replace(".", ",");
+    }
+    var dateStr = parsed && parsed.data;
+    if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)){
+      dateInput.value = dateStr;
+    }
+    var note = parsed && parsed.nota;
+    if(note){
+      noteInput.value = String(note).trim().slice(0, 60);
+    }
+    updateSaveEnabled();
+  }
+
+  function startReceiptScan(file){
+    state.fabType = "expense"; state.fabStack = []; state.fabStep = 3;
+    renderFabStep();
+    fabPanel.classList.add("show");
+    fabBtn.classList.add("open");
+    showScrim();
+    activeOverlay = "fab";
+
+    loadTesseract()
+      .then(function(){
+        return window.Tesseract.recognize(file, "ita+eng", {
+          logger: function(m){
+            if(m.status==="recognizing text"){
+              setScanStatus("Sto leggendo lo scontrino... " + Math.round(m.progress*100) + "%");
+            }
+          }
+        });
+      })
+      .then(function(result){
+        var text = ((result && result.data && result.data.text) || "").trim();
+        if(!text) throw new Error("Nessun testo riconosciuto nell'immagine.");
+        setScanStatus("Sto interpretando i dati...");
+        return interpretReceiptText(text);
+      })
+      .then(function(parsed){
+        if(activeOverlay !== "fab") return; // pannello chiuso nel frattempo
+        applyReceiptResult(parsed);
+      })
+      .catch(function(){
+        if(activeOverlay !== "fab") return;
+        state.fabType = "expense"; state.fabStack = []; state.fabStep = 4;
+        renderFabStep();
+        alert("Non sono riuscito a leggere lo scontrino. Inserisci i dati manualmente.");
+      });
+  }
+
+  receiptFileInput.addEventListener("change", function(){
+    var file = receiptFileInput.files[0];
+    receiptFileInput.value = "";
+    if(file) startReceiptScan(file);
+  });
+
   // ---------- delete action sheet ----------
   var deleteSheet = document.getElementById("deleteSheet");
   function openDeleteSheet(id){
@@ -817,16 +1080,7 @@
     renderAll();
   });
 
-  // ---------- data menu ----------
-  var dataMenu = document.getElementById("dataMenu");
-  document.getElementById("menuBtn").addEventListener("click", function(){
-    if(activeOverlay==="data"){ closeAllOverlays(); return; }
-    closeAllOverlays();
-    dataMenu.classList.add("show");
-    showScrim();
-    activeOverlay = "data";
-  });
-
+  // ---------- gestione dati (dentro Impostazioni) ----------
   document.getElementById("exportBtn").addEventListener("click", function(){
     var blob = new Blob([JSON.stringify(state.transactions, null, 2)], {type:"application/json"});
     var url = URL.createObjectURL(blob);
@@ -1121,8 +1375,9 @@
     calendarPopup.classList.add("show");
     showScrim();
     activeOverlay = "calendar";
+    setActiveNav("calendario");
   }
-  document.getElementById("calendarBtn").addEventListener("click", function(){
+  document.getElementById("navCalendarBtn").addEventListener("click", function(){
     if(activeOverlay==="calendar"){ closeAllOverlays(); return; }
     openCalendar();
   });
@@ -1406,11 +1661,13 @@
     chartState.selectedIndex = null;
     renderLineChart();
     document.getElementById("chartView").classList.add("show");
+    setActiveNav("grafico");
   }
   function closeChartView(){
     document.getElementById("chartView").classList.remove("show");
+    setActiveNav("home");
   }
-  document.getElementById("chartEntryBtn").addEventListener("click", openChartView);
+  document.getElementById("navChartBtn").addEventListener("click", openChartView);
   document.getElementById("chartBack").addEventListener("click", closeChartView);
   document.getElementById("chartRangeRow").addEventListener("click", function(e){
     var btn = e.target.closest(".range-chip");
@@ -1472,14 +1729,16 @@
       list.appendChild(row);
     });
   }
-  document.getElementById("settingsBtn").addEventListener("click", function(){
+  function openSettings(){
     closeAllOverlays();
     renderCardsList();
     renderThemeToggle();
     settingsSheet.classList.add("show");
     showScrim();
     activeOverlay = "settings";
-  });
+    setActiveNav("impostazioni");
+  }
+  document.getElementById("navSettingsBtn").addEventListener("click", openSettings);
   document.getElementById("settingsClose").addEventListener("click", closeAllOverlays);
   function addNewCard(){
     var input = document.getElementById("newCardInput");
@@ -1500,18 +1759,10 @@
     if(e.key==="Enter"){ e.preventDefault(); addNewCard(); }
   });
 
-  document.getElementById("resetBtn").addEventListener("click", function(){
-    closeAllOverlays();
-    if(confirm("Cancellare definitivamente tutti i movimenti? L'operazione non è reversibile.")){
-      state.transactions = [];
-      saveTransactions();
-      renderAll();
-    }
-  });
-
   // ---------- init ----------
   state.customCards = loadCustomCards();
   renderAll();
+  setActiveNav("home");
 })();
 
 if("serviceWorker" in navigator){
