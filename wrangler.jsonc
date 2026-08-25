@@ -4,5 +4,5 @@
   // nuovo invece di aggiornare quello collegato a questa repo.
   "name": "mymoney",
   "main": "cloudflare-worker/groq-proxy.js",
-  "compatibility_date": "2026-08-26"
+  "compatibility_date": "2024-09-23"
 }
