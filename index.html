@@ -6,19 +6,22 @@
 (function(){
   try{
     var t = localStorage.getItem("portafoglio_theme_v1");
-    if(t === "light"){
+    var isLight = t === "light";
+    if(isLight){
       document.documentElement.classList.remove("theme-dark");
       document.documentElement.classList.add("theme-light");
     }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute("content", isLight ? "#F2F2F2" : "#0b0d10");
   }catch(e){}
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Portafoglio">
-<meta name="theme-color" content="#F2F2F2">
+<meta name="theme-color" content="#0b0d10" id="theme-color-meta">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
@@ -1692,6 +1695,8 @@
       document.documentElement.classList.add("theme-dark");
     }
     try{ localStorage.setItem(STORAGE_KEY_THEME, mode); }catch(e){}
+    var themeColorMeta = document.getElementById("theme-color-meta");
+    if(themeColorMeta) themeColorMeta.setAttribute("content", mode==="light" ? "#F2F2F2" : "#0b0d10");
     renderThemeToggle();
   }
   function renderThemeToggle(){

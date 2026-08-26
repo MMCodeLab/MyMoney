@@ -1,5 +1,5 @@
 // Service worker Portafoglio — cache-first per uso offline completo
-var CACHE_NAME = "portafoglio-cache-v1";
+var CACHE_NAME = "portafoglio-cache-v2";
 var CORE_ASSETS = [
   "./",
   "./index.html",

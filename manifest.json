@@ -6,8 +6,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F2F2F2",
-  "theme_color": "#F2F2F2",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
   "icons": [
     { "src": "icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
