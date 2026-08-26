@@ -165,24 +165,36 @@
   .donut{
     width:clamp(108px, 34vw, 148px); height:clamp(108px, 34vw, 148px); border-radius:50%;
     position:relative;
+    backdrop-filter:blur(14px) saturate(180%);
+    -webkit-backdrop-filter:blur(14px) saturate(180%);
     transition:background 1.2s cubic-bezier(.22,1,.36,1), filter .3s ease;
-    filter:drop-shadow(0 10px 18px rgba(0,0,0,0.18));
+    filter:drop-shadow(0 12px 22px rgba(0,0,0,0.22));
     box-shadow:
-      inset 0 -12px 20px rgba(0,0,0,0.12),
-      inset 0 8px 14px rgba(255,255,255,0.5),
-      inset 0 0 0 1px rgba(255,255,255,0.4);
+      inset 0 0 0 1.5px rgba(255,255,255,0.55),
+      inset 0 1px 4px rgba(255,255,255,0.45),
+      inset 0 -8px 14px rgba(0,0,0,0.1);
     animation:donutPop .6s cubic-bezier(.22,1,.36,1) both;
   }
   .donut::before{
     content:""; position:absolute; inset:0; border-radius:50%;
-    background:radial-gradient(circle at 30% 22%, rgba(255,255,255,0.75), rgba(255,255,255,0) 55%);
+    background:radial-gradient(circle at 28% 20%, rgba(255,255,255,0.65), rgba(255,255,255,0) 55%);
     mix-blend-mode:overlay; pointer-events:none;
+  }
+  .donut::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.4) 6%, transparent 16%, transparent 100%);
+    mix-blend-mode:overlay; pointer-events:none;
+    animation:donutSheen 9s linear infinite;
+  }
+  @keyframes donutSheen{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
   }
   .donut-hole{
     position:absolute; inset:22px; border-radius:50%;
-    background:rgba(255,255,255,0.55);
-    backdrop-filter:blur(14px) saturate(180%);
-    -webkit-backdrop-filter:blur(14px) saturate(180%);
+    background:rgba(255,255,255,0.4);
+    backdrop-filter:blur(18px) saturate(200%);
+    -webkit-backdrop-filter:blur(18px) saturate(200%);
     border:1px solid rgba(255,255,255,0.6);
     display:flex; align-items:center; justify-content:center;
     flex-direction:column;
@@ -823,7 +835,7 @@
   .theme-dark .chart-card{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
   .theme-dark .chart-card.income{ background:linear-gradient(165deg, rgba(255,255,255,0.07) 50%, rgba(52,199,89,0.16) 140%); }
   .theme-dark .chart-card.expense{ background:linear-gradient(165deg, rgba(255,255,255,0.07) 50%, rgba(255,59,48,0.16) 140%); }
-  .theme-dark .donut-hole{ background:rgba(20,22,26,0.7); border-color:rgba(255,255,255,0.12); }
+  .theme-dark .donut-hole{ background:rgba(20,22,26,0.45); border-color:rgba(255,255,255,0.16); }
   .theme-dark .tx-card{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
   .theme-dark .cards-list{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
   .theme-dark .settings-actions-list{ background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); }
