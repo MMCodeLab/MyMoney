@@ -139,6 +139,15 @@
     <label>Carta</label>
     <div class="card-chip-scroll" id="cardChipScroll"></div>
   </div>
+  <div class="field">
+    <label>Ripeti</label>
+    <div class="repeat-chip-row" id="repeatChipRow">
+      <button type="button" class="repeat-chip selected" data-freq="none">Mai</button>
+      <button type="button" class="repeat-chip" data-freq="daily">Ogni giorno</button>
+      <button type="button" class="repeat-chip" data-freq="monthly">Ogni mese</button>
+      <button type="button" class="repeat-chip" data-freq="yearly">Ogni anno</button>
+    </div>
+  </div>
   <button class="save-btn" id="saveBtn" disabled>Salva movimento</button>
 </div>
 
@@ -224,6 +233,9 @@
     <button id="addCardBtn">Aggiungi</button>
   </div>
 
+  <div class="settings-section-label">Movimenti ricorrenti</div>
+  <div class="cards-list recurring-list" id="recurringList"></div>
+
   <div class="settings-section-label">Dati</div>
   <div class="settings-actions-list">
     <button id="exportBtn">Esporta dati (JSON)</button>
@@ -308,6 +320,8 @@
   var STORAGE_KEY = "portafoglio_transactions_v1";
   var STORAGE_KEY_CARDS = "portafoglio_cards_v1";
   var STORAGE_KEY_GOAL = "portafoglio_savings_goal_v1";
+  var STORAGE_KEY_RECURRING = "portafoglio_recurring_v1";
+  var RECURRING_LABELS = { daily:"Ogni giorno", monthly:"Ogni mese", yearly:"Ogni anno" };
 
   var ICONS = {
     briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path><line x1="2" y1="12" x2="22" y2="12"></line></svg>',
@@ -361,9 +375,11 @@
     pendingType: null,
     pendingCategory: null,
     pendingCard: "Contanti",
+    pendingFrequency: "none",
     pendingDeleteId: null,
     detailType: null,
     customCards: [],
+    recurringRules: [],
     calendarSelectedDate: null,
     lastModalBalance: 0
   };
@@ -394,6 +410,59 @@
     catch(e){ /* storage unavailable */ }
   }
   function allCards(){ return ["Contanti"].concat(state.customCards); }
+  function loadRecurringRules(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY_RECURRING);
+      if(!raw) return [];
+      var parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(e){ return []; }
+  }
+  function saveRecurringRules(){
+    try{ localStorage.setItem(STORAGE_KEY_RECURRING, JSON.stringify(state.recurringRules)); }
+    catch(e){ /* storage unavailable */ }
+  }
+  // sposta una data (YYYY-MM-DD) avanti di un intervallo, per calcolare la prossima occorrenza
+  function addInterval(dateStr, frequency){
+    var d = new Date(dateStr+"T00:00:00");
+    if(frequency==="daily") d.setDate(d.getDate()+1);
+    else if(frequency==="monthly") d.setMonth(d.getMonth()+1);
+    else if(frequency==="yearly") d.setFullYear(d.getFullYear()+1);
+    return dateKey(d);
+  }
+  // genera, come normali movimenti, tutte le occorrenze dovute di una regola ricorrente
+  // (da rule.nextDate fino a uptoDateStr incluso), avanzando rule.nextDate man mano
+  function generateOccurrencesForRule(rule, uptoDateStr){
+    var created = false;
+    var guard = 0; // tetto di sicurezza: evita un ciclo eccessivo su dati corrotti
+    while(rule.active && rule.nextDate<=uptoDateStr && guard<3660){
+      guard++;
+      state.transactions.push({
+        id: "t"+Date.now()+Math.random().toString(36).slice(2,7)+guard,
+        type: rule.type,
+        categoryId: rule.categoryId,
+        amount: rule.amount,
+        note: rule.note,
+        card: rule.card,
+        date: rule.nextDate,
+        createdAt: Date.now(),
+        recurringId: rule.id
+      });
+      rule.nextDate = addInterval(rule.nextDate, rule.frequency);
+      created = true;
+    }
+    return created;
+  }
+  // da chiamare a ogni avvio: recupera le occorrenze maturate da quando l'app
+  // non era aperta (es. una spesa "ogni giorno" rimasta indietro di 3 giorni)
+  function generateDueOccurrences(){
+    var today = todayISO();
+    var changed = false;
+    state.recurringRules.forEach(function(rule){
+      if(generateOccurrencesForRule(rule, today)) changed = true;
+    });
+    if(changed){ saveTransactions(); saveRecurringRules(); }
+  }
   function loadSavingsGoal(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY_GOAL);
@@ -574,9 +643,12 @@
         var subParts = [];
         if(t.card) subParts.push(escapeHtml(t.card));
         if(t.note) subParts.push(escapeHtml(t.note));
+        var recurringBadge = t.recurringId
+          ? '<span class="tx-recurring-badge" title="Movimento ricorrente">'+ICONS.refresh+'</span>'
+          : '';
         row.innerHTML =
           '<div class="tx-icon" style="background:'+cat.color+'26;color:'+cat.color+';">'+(ICONS[cat.logo]||"")+'</div>' +
-          '<div class="tx-mid"><div class="tx-name">'+escapeHtml(cat.name)+'</div>' +
+          '<div class="tx-mid"><div class="tx-name">'+escapeHtml(cat.name)+recurringBadge+'</div>' +
           (subParts.length ? '<div class="tx-note">'+subParts.join(" · ")+'</div>' : '') + '</div>' +
           '<div class="tx-amount '+t.type+'">'+(t.type==="income"?"+":"-")+fmtEUR(t.amount).replace("€","")+' €</div>';
         row.addEventListener("click", function(){ openDeleteSheet(t.id); });
@@ -787,6 +859,17 @@
   var saveBtn = document.getElementById("saveBtn");
   var sheetIcon = document.getElementById("sheetIcon");
   var sheetCatName = document.getElementById("sheetCatName");
+  var repeatChipRow = document.getElementById("repeatChipRow");
+
+  if(repeatChipRow){
+    repeatChipRow.querySelectorAll(".repeat-chip").forEach(function(chip){
+      chip.addEventListener("click", function(){
+        state.pendingFrequency = chip.dataset.freq;
+        repeatChipRow.querySelectorAll(".repeat-chip").forEach(function(c){ c.classList.remove("selected"); });
+        chip.classList.add("selected");
+      });
+    });
+  }
 
   function refreshCardChips(){
     var container = document.getElementById("cardChipScroll");
@@ -810,6 +893,7 @@
     state.pendingType = type;
     state.pendingCategory = categoryId;
     state.pendingCard = "Contanti";
+    state.pendingFrequency = "none";
     sheetIcon.innerHTML = ICONS[cat.logo] || "";
     sheetIcon.style.color = cat.color;
     sheetIcon.style.background = cat.color+"22";
@@ -818,6 +902,11 @@
     noteInput.value = "";
     dateInput.value = todayISO();
     refreshCardChips();
+    if(repeatChipRow){
+      repeatChipRow.querySelectorAll(".repeat-chip").forEach(function(c){
+        c.classList.toggle("selected", c.dataset.freq==="none");
+      });
+    }
     updateSaveEnabled();
     sheet.classList.add("show");
     showScrim();
@@ -858,21 +947,44 @@
   }
   function finalizeTransaction(){
     var amount = parsedAmount();
-    var tx = {
-      id: "t"+Date.now()+Math.random().toString(36).slice(2,7),
-      type: state.pendingType,
-      categoryId: state.pendingCategory,
-      amount: Math.round(amount*100)/100,
-      note: noteInput.value.trim(),
-      card: state.pendingCard || "Contanti",
-      date: dateInput.value || todayISO(),
-      createdAt: Date.now()
-    };
-    state.transactions.push(tx);
-    saveTransactions();
-    var d = new Date(tx.date+"T00:00:00");
+    var chosenDate = dateInput.value || todayISO();
+
+    if(state.pendingFrequency && state.pendingFrequency!=="none"){
+      // movimento ricorrente: si crea la regola e si generano subito le occorrenze
+      // gia' dovute (incluso oggi, se la data scelta non e' nel futuro)
+      var rule = {
+        id: "r"+Date.now()+Math.random().toString(36).slice(2,7),
+        type: state.pendingType,
+        categoryId: state.pendingCategory,
+        amount: Math.round(amount*100)/100,
+        note: noteInput.value.trim(),
+        card: state.pendingCard || "Contanti",
+        frequency: state.pendingFrequency,
+        nextDate: chosenDate,
+        active: true
+      };
+      state.recurringRules.push(rule);
+      generateOccurrencesForRule(rule, todayISO());
+      saveRecurringRules();
+      saveTransactions();
+    } else {
+      var tx = {
+        id: "t"+Date.now()+Math.random().toString(36).slice(2,7),
+        type: state.pendingType,
+        categoryId: state.pendingCategory,
+        amount: Math.round(amount*100)/100,
+        note: noteInput.value.trim(),
+        card: state.pendingCard || "Contanti",
+        date: chosenDate,
+        createdAt: Date.now()
+      };
+      state.transactions.push(tx);
+      saveTransactions();
+    }
+
+    var d = new Date(chosenDate+"T00:00:00");
     state.period.y = d.getFullYear(); state.period.m = d.getMonth();
-    state.segment = tx.type;
+    state.segment = state.pendingType;
     document.getElementById("expenseConfirmDialog").classList.remove("show");
     closeAllOverlays();
     renderAll();
@@ -1734,9 +1846,43 @@
       list.appendChild(row);
     });
   }
+  function renderRecurringList(){
+    var list = document.getElementById("recurringList");
+    if(!list) return;
+    list.innerHTML = "";
+    var activeRules = state.recurringRules.filter(function(r){ return r.active; });
+    if(activeRules.length===0){
+      var empty = document.createElement("div");
+      empty.className = "recurring-empty";
+      empty.textContent = "Nessun movimento ricorrente attivo.";
+      list.appendChild(empty);
+      return;
+    }
+    activeRules.forEach(function(rule){
+      var cat = catById(rule.type, rule.categoryId) || {name:"Altro", icon:"✨", color:"#8E8E93", logo:"star"};
+      var row = document.createElement("div");
+      row.className = "card-row recurring-row";
+      row.innerHTML =
+        '<div class="card-chip-icon" style="background:'+cat.color+'22;color:'+cat.color+';">'+(ICONS[cat.logo]||"")+'</div>' +
+        '<div class="recurring-mid"><div class="card-name">'+escapeHtml(cat.name)+(rule.note?" · "+escapeHtml(rule.note):"")+'</div>' +
+        '<div class="recurring-sub">'+(rule.type==="income"?"+":"-")+fmtEUR(rule.amount).replace("€","")+' € · '+RECURRING_LABELS[rule.frequency]+'</div></div>';
+      var stopBtn = document.createElement("button");
+      stopBtn.className = "card-remove";
+      stopBtn.textContent = "✕";
+      stopBtn.setAttribute("aria-label", "Interrompi movimento ricorrente");
+      stopBtn.addEventListener("click", function(){
+        rule.active = false;
+        saveRecurringRules();
+        renderRecurringList();
+      });
+      row.appendChild(stopBtn);
+      list.appendChild(row);
+    });
+  }
   function openSettings(){
     closeAllOverlays();
     renderCardsList();
+    renderRecurringList();
     renderThemeToggle();
     settingsSheet.classList.add("show");
     showScrim();
@@ -1766,6 +1912,8 @@
 
   // ---------- init ----------
   state.customCards = loadCustomCards();
+  state.recurringRules = loadRecurringRules();
+  generateDueOccurrences();
   renderAll();
   setActiveNav("home");
 })();
