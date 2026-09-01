@@ -11,6 +11,10 @@
     --glass-border:rgba(255,255,255,0.85);
     --glass-shadow:0 8px 32px rgba(30,41,59,0.14);
     --nav-accent-gradient:linear-gradient(135deg, var(--blue), #5AC8FA);
+    /* Quanto in alto compaiono le barrette del guscio comune (js/pwa-shell.js):
+       sopra la barra di navigazione e sopra il pulsante rotondo. */
+    --pwa-shell-offset:170px;
+    --pwa-shell-warning:#a56100;
   }
   .theme-dark{
     --bg1:#04120c; --bg2:#071b2e; --bg3:#0a2718; --bg4:#03080c;
@@ -23,6 +27,7 @@
     --glass-bg:rgba(255,255,255,0.07);
     --glass-border:rgba(255,255,255,0.14);
     --glass-shadow:0 8px 32px rgba(0,0,0,0.45);
+    --pwa-shell-warning:#f4b740;
   }
   .theme-light{
     --bg1:#eef2fb; --bg2:#f2eefb; --bg3:#eefbf4; --bg4:#fbf3ee;
@@ -890,3 +895,11 @@
     background:var(--card); color:var(--text); font-size:13.5px; font-weight:700;
   }
   .theme-toggle-btn.active{ background:var(--blue); border-color:var(--blue); color:#fff; }
+
+/* Riga "ultimo backup: ..." sotto i pulsanti dei dati nelle impostazioni. */
+.settings-hint{
+  padding:10px 16px 2px;
+  font-size:13px;
+  color:var(--text-secondary);
+}
+.settings-hint.is-overdue{ color:var(--pwa-shell-warning); font-weight:600; }

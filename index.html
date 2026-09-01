@@ -241,6 +241,7 @@
     <button id="exportBtn">Esporta dati (JSON)</button>
     <button id="importBtn">Importa dati</button>
   </div>
+  <div class="settings-hint" id="backupStatus"></div>
 </div>
 
 <div class="balance-modal" id="balanceModal">
@@ -313,6 +314,7 @@
 
 <div class="scrim" id="scrim"></div>
 
+<script src="js/pwa-shell.js" data-app="mymoney" data-sw="service-worker.js"></script>
 <script>
 (function(){
   "use strict";
@@ -1206,6 +1208,10 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    // il guscio comune (js/pwa-shell.js) tiene la data dell'ultimo backup, per
+    // mostrarla qui sotto e ricordare di rifarlo dopo un mese
+    if(window.PwaShell) window.PwaShell.markBackupDone();
+    refreshBackupStatus();
     closeAllOverlays();
   });
 
@@ -1879,11 +1885,22 @@
       list.appendChild(row);
     });
   }
+  // Riga "ultimo backup: ..." sotto i pulsanti dei dati: diventa gialla quando
+  // e' passato piu' di un mese e c'e' qualcosa da perdere.
+  function refreshBackupStatus(){
+    var el = document.getElementById("backupStatus");
+    if(!el || !window.PwaShell) return;
+    var info = window.PwaShell.backupInfo();
+    el.textContent = window.PwaShell.backupLabel();
+    el.classList.toggle("is-overdue", !!info.overdue);
+  }
+
   function openSettings(){
     closeAllOverlays();
     renderCardsList();
     renderRecurringList();
     renderThemeToggle();
+    refreshBackupStatus();
     settingsSheet.classList.add("show");
     showScrim();
     activeOverlay = "settings";
@@ -1910,6 +1927,24 @@
     if(e.key==="Enter"){ e.preventDefault(); addNewCard(); }
   });
 
+  // Il guscio comune (js/pwa-shell.js) registra il service worker, avvisa quando
+  // c'e' una nuova versione e mostra la barretta "sei offline". Qui gli si dice
+  // soltanto come sono fatti i dati di MyMoney.
+  //
+  // Nota: fino a questa versione la registrazione puntava a "service-worker.js"
+  // mentre il file si chiamava "ServiceWorker.js". Su GitHub Pages, dove le
+  // maiuscole contano, la richiesta rispondeva 404 e il service worker non si
+  // registrava mai: niente offline e niente installazione. Ora il file ha il
+  // nome giusto.
+  if(window.PwaShell){
+    window.PwaShell.configure({
+      hasData: function(){
+        return !!(state.transactions && state.transactions.length);
+      },
+      onBackupRequest: openSettings
+    });
+  }
+
   // ---------- init ----------
   state.customCards = loadCustomCards();
   state.recurringRules = loadRecurringRules();
@@ -1917,14 +1952,6 @@
   renderAll();
   setActiveNav("home");
 })();
-
-if("serviceWorker" in navigator){
-  window.addEventListener("load", function(){
-    navigator.serviceWorker.register("service-worker.js").catch(function(){
-      /* PWA offline non disponibile, l'app funziona comunque online */
-    });
-  });
-}
 </script>
 </body>
 </html>
