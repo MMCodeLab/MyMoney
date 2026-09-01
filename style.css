@@ -903,3 +903,100 @@
   color:var(--text-secondary);
 }
 .settings-hint.is-overdue{ color:var(--pwa-shell-warning); font-weight:600; }
+
+
+/* ---------- Budget per categoria ---------- */
+.budget-card{
+  margin:0 16px 14px;
+  padding:14px 16px 6px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(18px) saturate(190%); -webkit-backdrop-filter:blur(18px) saturate(190%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+}
+.budget-card-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  margin-bottom:12px;
+}
+.budget-card-title{ font-size:15px; font-weight:700; }
+.budget-card-sub{ font-size:12px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+.budget-card-sub.is-over{ color:var(--red); font-weight:700; }
+
+.budget-row{ display:flex; align-items:flex-start; gap:10px; padding-bottom:12px; }
+.budget-icon{
+  flex:0 0 auto; width:30px; height:30px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+}
+.budget-icon svg{ width:16px; height:16px; }
+.budget-mid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
+.budget-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.budget-name{ font-size:14px; font-weight:600; }
+.budget-amount{ font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.budget-amount small{ font-weight:400; color:var(--text-secondary); }
+
+.budget-bar{
+  display:block; height:6px; border-radius:3px;
+  background:rgba(120,120,128,0.22); overflow:hidden;
+}
+.budget-bar-fill{ display:block; height:100%; border-radius:3px; transition:width .35s ease; }
+.budget-bar-fill.is-ok{ background:linear-gradient(90deg, var(--green), #30D158); }
+.budget-bar-fill.is-warn{ background:linear-gradient(90deg, #FF9500, #FFCC00); }
+.budget-bar-fill.is-over{ background:linear-gradient(90deg, var(--red), #FF6B5A); }
+
+.budget-sub{ font-size:11.5px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+.budget-sub.is-warn{ color:#C77700; }
+.budget-sub.is-over{ color:var(--red); font-weight:600; }
+.theme-dark .budget-sub.is-warn{ color:#FFB340; }
+
+/* Nessun budget impostato: la scheda diventa l'invito a metterne uno */
+.budget-empty{
+  display:flex; flex-direction:column; gap:4px; text-align:left;
+  width:100%; border:0; background:none; padding:0 0 8px; color:inherit; font:inherit;
+}
+.budget-empty-title{ font-size:15px; font-weight:700; }
+.budget-empty-text{ font-size:12.5px; color:var(--text-secondary); line-height:1.45; }
+
+/* Impostazioni: un tetto per categoria */
+.budget-setting-row{ gap:10px; }
+.budget-setting-name{ flex:1; font-size:15px; }
+.budget-setting-input{
+  display:flex; align-items:center; gap:3px;
+  background:rgba(120,120,128,0.14); border-radius:var(--radius-sm); padding:4px 10px;
+}
+.budget-setting-euro{ font-size:14px; color:var(--text-secondary); }
+.budget-setting-input input{
+  width:64px; border:0; background:transparent; color:var(--text);
+  font-size:15px; font-weight:600; text-align:right; outline:none;
+  font-variant-numeric:tabular-nums;
+  -moz-appearance:textfield;
+}
+.budget-setting-input input::-webkit-outer-spin-button,
+.budget-setting-input input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+/* ---------- Foglio del riepilogo ---------- */
+#recapSheet{ max-height:80vh; overflow-y:auto; }
+.recap-sub{ margin:0 0 12px; font-size:13px; color:var(--text-secondary); }
+.recap-total{
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:12px 14px; margin-bottom:12px;
+  background:rgba(120,120,128,0.12); border-radius:var(--radius-md);
+}
+.recap-total span{ font-size:13px; color:var(--text-secondary); }
+.recap-total strong{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.recap-row{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 2px; border-bottom:1px solid var(--hairline);
+}
+.recap-row:last-child{ border-bottom:0; }
+.recap-mid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.recap-name{ font-size:14.5px; font-weight:600; }
+.recap-note{ font-size:11.5px; color:var(--text-secondary); }
+.recap-note.is-warn{ color:#C77700; }
+.recap-note.is-over{ color:var(--red); font-weight:600; }
+.theme-dark .recap-note.is-warn{ color:#FFB340; }
+.recap-amount{ font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.recap-empty{ font-size:13.5px; color:var(--text-secondary); padding:8px 2px 16px; }
+
+/* Le impostazioni sono cresciute: senza questo il foglio esce dallo schermo */
+#settingsSheet{ max-height:82vh; overflow-y:auto; }
