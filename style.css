@@ -1012,3 +1012,62 @@
 /* Nella riga del movimento il badge sta dentro la nota, che e' su una riga
    sola: inline-flex lo tiene centrato sul nome della carta. */
 .tx-card-tag{ display:inline-flex; align-items:center; gap:5px; vertical-align:-3px; }
+
+/* ---------- Abbonamenti ---------- */
+/* Stessa scatola di vetro della card del budget: in home le due schede si
+   leggono come una cosa sola. */
+.subs-card{
+  margin:0 16px 14px;
+  padding:14px 16px 10px;
+  background:var(--glass-bg);
+  backdrop-filter:blur(18px) saturate(190%); -webkit-backdrop-filter:blur(18px) saturate(190%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+}
+.subs-card[hidden]{ display:none; }
+/* Dentro il foglio del riepilogo la sezione non ha bisogno della sua scatola:
+   il foglio e' gia' un contenitore. Serve solo una riga che la stacchi. */
+.recap-subs:not(:empty){ margin-top:18px; padding-top:16px; border-top:1px solid var(--hairline); }
+
+.subs-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.subs-title{ font-size:15px; font-weight:700; }
+.subs-count{ font-size:12px; color:var(--text-secondary); }
+
+.subs-totals{ display:flex; gap:10px; margin-bottom:10px; }
+.subs-total{
+  flex:1; display:flex; flex-direction:column; gap:2px;
+  padding:10px 12px; border-radius:var(--radius-md); background:rgba(120,120,128,0.12);
+}
+.subs-total small{ font-size:11.5px; color:var(--text-secondary); }
+.subs-total strong{ font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; }
+.subs-total.is-main strong{ font-size:20px; }
+
+.subs-share{ font-size:12.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.4; }
+/* Oltre un quarto delle entrate l'informazione smette di essere una curiosita' */
+.subs-share.is-high{ color:var(--red); font-weight:600; }
+
+.subs-row{ display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--hairline); }
+.subs-row:last-child{ border-bottom:0; }
+.subs-mid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.subs-name{ font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.subs-sub{ display:flex; align-items:flex-start; gap:5px; font-size:11.5px; color:var(--text-secondary); min-width:0; }
+/* Qui il testo va a capo invece di finire nei puntini: la data del prossimo
+   addebito e' l'informazione piu' utile della riga, e su uno schermo stretto
+   sarebbe sempre lei a sparire. */
+.subs-sub > span{ min-width:0; line-height:1.4; }
+.subs-sub .card-brand-badge{ margin-top:1px; }
+.subs-amount{
+  flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end;
+  font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.subs-amount small{ font-size:10.5px; font-weight:400; color:var(--text-secondary); }
+
+.subs-suspects{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--hairline); }
+.subs-suspects-title{ font-size:13.5px; font-weight:700; margin-bottom:3px; }
+.subs-suspects-hint{ font-size:11.5px; color:var(--text-secondary); line-height:1.45; margin-bottom:4px; }
+.subs-promote{
+  flex:0 0 auto; border:0; border-radius:999px; background:var(--blue); color:#fff;
+  font-size:12px; font-weight:700; padding:8px 13px;
+}
+.subs-promote:active{ opacity:.75; }

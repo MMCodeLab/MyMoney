@@ -77,6 +77,8 @@
 
   <section class="budget-card" id="budgetCard"></section>
 
+  <section class="subs-card" id="subsCard" hidden></section>
+
   <div class="segmented-wrap">
     <div class="segmented" id="segmented">
       <div class="seg-indicator" id="segIndicator"></div>
@@ -748,6 +750,12 @@
     div.textContent = s;
     return div.innerHTML;
   }
+  // escapeHtml basta per il testo ma non per un attributo: innerHTML non tocca
+  // le virgolette, e una nota che ne contiene una (una spesa scritta 5" di
+  // troppo) spezzerebbe l'attributo e con lui il pulsante accanto.
+  function escapeAttr(s){
+    return escapeHtml(s).replace(/"/g, "&quot;");
+  }
 
   // ---------- rendering: budget ----------
 
@@ -818,6 +826,7 @@
     renderDonut("income");
     renderDonut("expense");
     renderBudgetCard();
+    renderSubscriptionsCard();
     renderSegmented();
     renderList();
   }
@@ -2118,6 +2127,210 @@
     });
   }
 
+  // ---------- abbonamenti ----------
+  //
+  // Un abbonamento qui non e' un dato nuovo: e' una regola ricorrente di uscita
+  // che torna ogni mese o ogni anno (lo streaming, l'assicurazione, la
+  // palestra). Guardarle tutte insieme risponde alla domanda a cui il diario
+  // dei movimenti non risponde: quanto se ne va ogni mese senza piu' pensarci.
+
+  function isSubscriptionRule(rule){
+    return !!rule && rule.active && rule.type === "expense" &&
+           (rule.frequency === "monthly" || rule.frequency === "yearly");
+  }
+  // Gli annuali si spalmano su dodici mesi: se no un'assicurazione da 300 euro
+  // sembrerebbe piu' cara dello streaming in un mese e assente negli altri.
+  function monthlyCostOf(rule){
+    return rule.frequency === "yearly" ? rule.amount/12 : rule.amount;
+  }
+  function subscriptionRules(){
+    return state.recurringRules.filter(isSubscriptionRule).sort(function(a,b){
+      return monthlyCostOf(b) - monthlyCostOf(a);
+    });
+  }
+
+  // Entrate medie dei tre mesi gia' conclusi. Il mese in corso resta fuori
+  // apposta: a meta' mese lo stipendio magari non e' ancora arrivato, e la
+  // media direbbe che gli abbonamenti pesano il doppio di quanto pesano.
+  function avgMonthlyIncome(){
+    var now = new Date();
+    var total = 0;
+    var mesiConEntrate = 0;
+    for(var i=1; i<=3; i++){
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      var range = monthRange(d.getFullYear(), d.getMonth());
+      var sum = 0;
+      state.transactions.forEach(function(t){
+        if(t.type==="income" && t.date>=range.from && t.date<=range.to) sum += t.amount;
+      });
+      total += sum;
+      if(sum > 0) mesiConEntrate++;
+    }
+    // "Abbastanza dati" vuol dire almeno due mesi su tre con entrate: con uno
+    // solo la percentuale racconterebbe i due mesi vuoti, non le abitudini.
+    if(mesiConEntrate < 2) return null;
+    return total/3;
+  }
+
+  // Movimenti normali (senza recurringId) con lo stesso importo e la stessa
+  // nota che tornano in almeno tre mesi diversi: e' l'addebito che si registra
+  // a mano ogni volta, e che quindi non compare tra le regole ricorrenti.
+  function suspectSubscriptions(){
+    var groups = {};
+    state.transactions.forEach(function(t){
+      if(t.type !== "expense" || t.recurringId) return;
+      var note = (t.note||"").trim();
+      // Senza nota due spese dello stesso importo non si somigliano
+      // abbastanza: due caffe' da 1,50 euro non sono un abbonamento.
+      if(!note) return;
+      var key = note.toLowerCase()+"|"+t.amount.toFixed(2);
+      if(!groups[key]) groups[key] = { key:key, note:note, amount:t.amount, months:{}, items:[] };
+      groups[key].months[t.date.slice(0,7)] = true;
+      groups[key].items.push(t);
+    });
+
+    var out = [];
+    Object.keys(groups).forEach(function(k){
+      var g = groups[k];
+      var mesi = Object.keys(g.months).length;
+      if(mesi < 3) return;
+      // Se una regola uguale esiste gia' non ha senso riproporla.
+      var giaRegola = state.recurringRules.some(function(r){
+        return isSubscriptionRule(r) && Math.abs(r.amount-g.amount) < 0.005 &&
+               (r.note||"").trim().toLowerCase() === g.note.toLowerCase();
+      });
+      if(giaRegola) return;
+      g.items.sort(function(a,b){ return a.date.localeCompare(b.date); });
+      out.push({ key:g.key, note:g.note, amount:g.amount, mesi:mesi, last:g.items[g.items.length-1] });
+    });
+    return out.sort(function(a,b){ return b.amount-a.amount; });
+  }
+
+  // Trasforma un sospetto in regola ricorrente mensile. La prima occorrenza e'
+  // sempre nel futuro: partire dall'ultimo addebito farebbe ricomparire da solo
+  // un movimento gia' registrato a mano, e il saldo cambierebbe senza motivo.
+  function promoteSuspect(suspect){
+    var last = suspect.last;
+    var next = addInterval(last.date, "monthly");
+    var oggi = todayISO();
+    var guard = 0;
+    while(next <= oggi && guard < 60){ next = addInterval(next, "monthly"); guard++; }
+    state.recurringRules.push({
+      id: "r"+Date.now()+Math.random().toString(36).slice(2,7),
+      type: "expense",
+      categoryId: last.categoryId,
+      amount: last.amount,
+      note: last.note,
+      card: last.card || "Contanti",
+      frequency: "monthly",
+      nextDate: next,
+      active: true
+    });
+    saveRecurringRules();
+  }
+
+  function formatNextCharge(dateStr){
+    if(dateStr === todayISO()) return "oggi";
+    var d = new Date(dateStr+"T00:00:00");
+    return d.getDate()+" "+MONTHS_IT[d.getMonth()].toLowerCase();
+  }
+
+  function subscriptionRowHtml(rule){
+    var cat = catById("expense", rule.categoryId) || {name:"Altro", color:"#8E8E93", logo:"star"};
+    var nome = rule.note ? rule.note : cat.name;
+    var sub = [];
+    if(rule.note) sub.push(escapeHtml(cat.name));
+    if(rule.frequency === "yearly") sub.push(fmtEUR(rule.amount)+" all'anno");
+    sub.push("prossimo addebito "+formatNextCharge(rule.nextDate));
+
+    return '<div class="subs-row">' +
+      '<span class="budget-icon" style="background:'+cat.color+'26;color:'+cat.color+';">'+(ICONS[cat.logo]||"")+'</span>' +
+      '<span class="subs-mid">' +
+        '<span class="subs-name">'+escapeHtml(nome)+'</span>' +
+        '<span class="subs-sub">'+cardBadge(rule.card||"Contanti", 13)+'<span>'+sub.join(" · ")+'</span></span>' +
+      '</span>' +
+      '<span class="subs-amount">'+fmtEUR(monthlyCostOf(rule))+'<small>al mese</small></span>' +
+    '</div>';
+  }
+
+  // La stessa sezione serve in due posti (la card in home e il foglio del
+  // riepilogo), quindi il markup si scrive una volta sola.
+  function subscriptionsHtml(){
+    var subs = subscriptionRules();
+    var sospetti = suspectSubscriptions();
+    if(!subs.length && !sospetti.length) return "";
+
+    var html = '<div class="subs-head"><span class="subs-title">Abbonamenti</span>' +
+      (subs.length ? '<span class="subs-count">'+subs.length+(subs.length===1?" attivo":" attivi")+'</span>' : '') +
+      '</div>';
+
+    if(subs.length){
+      var mensile = subs.reduce(function(sum, r){ return sum + monthlyCostOf(r); }, 0);
+      html += '<div class="subs-totals">' +
+        '<span class="subs-total is-main"><small>al mese</small><strong>'+fmtEUR(mensile)+'</strong></span>' +
+        '<span class="subs-total"><small>in un anno</small><strong>'+fmtEUR(mensile*12)+'</strong></span>' +
+      '</div>';
+
+      var entrate = avgMonthlyIncome();
+      if(entrate > 0){
+        var quota = Math.round((mensile/entrate)*100);
+        html += '<div class="subs-share'+(quota>=25?" is-high":"")+'">Sono il '+quota+
+                '% delle tue entrate medie degli ultimi tre mesi</div>';
+      }
+
+      html += '<div class="subs-list">'+subs.map(subscriptionRowHtml).join("")+'</div>';
+    }
+
+    if(sospetti.length){
+      html += '<div class="subs-suspects">' +
+        '<div class="subs-suspects-title">Forse sono abbonamenti</div>' +
+        '<div class="subs-suspects-hint">Stesso importo e stessa nota per almeno tre mesi, ma non sono ancora una regola ricorrente.</div>' +
+        sospetti.map(function(s){
+          return '<div class="subs-row subs-suspect-row">' +
+            '<span class="subs-mid">' +
+              '<span class="subs-name">'+escapeHtml(s.note)+'</span>' +
+              '<span class="subs-sub"><span>'+fmtEUR(s.amount)+' · '+s.mesi+' mesi diversi</span></span>' +
+            '</span>' +
+            '<button type="button" class="subs-promote" data-suspect="'+escapeAttr(s.key)+'">Rendi ricorrente</button>' +
+          '</div>';
+        }).join("") +
+      '</div>';
+    }
+
+    return html;
+  }
+
+  function wireSubscriptions(root){
+    root.querySelectorAll("[data-suspect]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var key = btn.getAttribute("data-suspect");
+        var sospetto = suspectSubscriptions().filter(function(s){ return s.key===key; })[0];
+        if(!sospetto) return;
+        promoteSuspect(sospetto);
+        renderAll();
+        renderRecurringList();
+        // Se il foglio del riepilogo e' aperto va ridisegnato anche lui: quel
+        // sospetto adesso e' un abbonamento vero e deve cambiare posto.
+        var recapSubs = document.getElementById("recapSubscriptions");
+        if(recapSubs){
+          recapSubs.innerHTML = subscriptionsHtml();
+          wireSubscriptions(recapSubs);
+        }
+      });
+    });
+  }
+
+  function renderSubscriptionsCard(){
+    var el = document.getElementById("subsCard");
+    if(!el) return;
+    // In home la card compare solo se c'e' almeno un abbonamento: senza,
+    // resterebbe in mezzo alla schermata un riquadro che non dice niente.
+    var html = subscriptionRules().length ? subscriptionsHtml() : "";
+    el.innerHTML = html;
+    el.hidden = !html;
+    if(html) wireSubscriptions(el);
+  }
+
   // ---------- riepilogo periodico ----------
   //
   // Arriva da solo due volte: al primo avvio di una settimana nuova (con la
@@ -2215,7 +2428,11 @@
     document.getElementById("recapBody").innerHTML =
       '<p class="recap-sub">' + escapeHtml(sub) + '</p>' +
       '<div class="recap-total"><span>Totale speso</span><strong>' + fmtEUR(totale) + '</strong></div>' +
-      recapRowsHtml(range, opts);
+      recapRowsHtml(range, opts) +
+      // Le spese del periodo raccontano quello che hai deciso di spendere; gli
+      // abbonamenti quello che continua a partire da solo. Stanno bene insieme.
+      '<div class="recap-subs" id="recapSubscriptions">' + subscriptionsHtml() + '</div>';
+    wireSubscriptions(document.getElementById("recapSubscriptions"));
 
     closeAllOverlays();
     document.getElementById("recapSheet").classList.add("show");

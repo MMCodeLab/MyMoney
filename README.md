@@ -20,6 +20,17 @@
 
 - Registrazione rapida di **entrate e uscite**, suddivise per categoria.
 - Riepilogo con **grafici** di entrate/uscite e andamento delle spese giornaliere.
+- **Movimenti ricorrenti** (ogni giorno, mese o anno) generati da soli all'avvio.
+- **Budget mensile per categoria**, con riepilogo di settimana e di mese.
+- **Riepilogo abbonamenti**: costo totale al mese, proiezione su un anno, elenco
+  dal piu' caro al piu' economico con carta e data del prossimo addebito, e quanto
+  pesano sulle entrate medie degli ultimi tre mesi. Trova anche gli *abbonamenti
+  sospetti* (stesso importo e stessa nota per almeno tre mesi, ma senza una regola
+  ricorrente) e propone di trasformarli in regola con un pulsante.
+- **Logo di ogni carta**: dal nome scritto ("Visa Revolut", "la mia postepay"...)
+  viene riconosciuto il marchio e disegnato un badge col suo colore. I loghi sono
+  SVG disegnati a mano, non immagini scaricate: niente marchi registrati e nessuna
+  dipendenza dalla rete.
 - **Conversione valuta** integrata, tramite API di cambio gratuita e senza chiave.
 - **Esportazione dati** in JSON per backup personale.
 - Installabile come app, con funzionamento offline.
@@ -45,11 +56,13 @@ Apri `index.html` con doppio click, oppure servilo con un qualsiasi server stati
 ## Struttura del progetto
 
 ```
-index.html            punto di ingresso e logica dell'app
+index.html              punto di ingresso e logica dell'app
 style.css               design system e temi
-ServiceWorker.js        service worker (funzionamento offline)
-manifest.json            manifest PWA (nome, icone, colori)
-icons/                    icone PWA
+js/card-brands.js       marchi delle carte e badge SVG disegnati a mano
+js/pwa-shell.js         guscio comune (service worker, avvisi, backup)
+service-worker.js       service worker (funzionamento offline)
+manifest.json           manifest PWA (nome, icone, colori)
+icons/                  icone PWA
 ```
 
 ---

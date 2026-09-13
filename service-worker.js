@@ -2,7 +2,7 @@
 // Alza questo numero a ogni pubblicazione: e' il cambiamento di questo file che
 // fa accorgere il browser che c'e' una versione nuova, e quindi fa comparire
 // l'avviso "Nuova versione disponibile" (vedi js/pwa-shell.js).
-var CACHE_NAME = "mymoney-v5";
+var CACHE_NAME = "mymoney-v6";
 var CORE_ASSETS = [
   "./",
   "./index.html",
