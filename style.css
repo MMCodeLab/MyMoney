@@ -1000,3 +1000,15 @@
 
 /* Le impostazioni sono cresciute: senza questo il foglio esce dallo schermo */
 #settingsSheet{ max-height:82vh; overflow-y:auto; }
+
+/* ---------- Marchi delle carte (js/card-brands.js) ---------- */
+/* Il badge e' un SVG quadrato con gli angoli gia' stondati: qui si sistema
+   solo come sta in riga accanto al testo. */
+.card-brand-badge{ display:block; flex:0 0 auto; }
+.card-row .card-brand-badge{ box-shadow:0 1px 3px rgba(0,0,0,0.18); }
+/* Il chip di scelta carta diventa "badge + nome": senza flex il badge
+   resterebbe appoggiato alla linea di base del testo, disallineato. */
+.card-select-chip{ display:inline-flex; align-items:center; gap:7px; padding-left:9px; }
+/* Nella riga del movimento il badge sta dentro la nota, che e' su una riga
+   sola: inline-flex lo tiene centrato sul nome della carta. */
+.tx-card-tag{ display:inline-flex; align-items:center; gap:5px; vertical-align:-3px; }

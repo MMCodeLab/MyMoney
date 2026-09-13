@@ -333,6 +333,7 @@
 <div class="scrim" id="scrim"></div>
 
 <script src="js/pwa-shell.js" data-app="mymoney" data-sw="service-worker.js"></script>
+<script src="js/card-brands.js"></script>
 <script>
 (function(){
   "use strict";
@@ -433,6 +434,13 @@
     catch(e){ /* storage unavailable */ }
   }
   function allCards(){ return ["Contanti"].concat(state.customCards); }
+  // Il badge col marchio della carta arriva da js/card-brands.js. Se quel file
+  // non e' stato caricato (una cache vecchia del service worker, per esempio)
+  // si ricade sull'icona generica usata finora, invece di lasciare un buco.
+  function cardBadge(name, size){
+    if(window.CardBrands) return window.CardBrands.badge(name, size);
+    return '<span class="card-chip-icon">'+ICONS.card+'</span>';
+  }
   function loadRecurringRules(){
     try{
       var raw = localStorage.getItem(STORAGE_KEY_RECURRING);
@@ -712,7 +720,9 @@
         row.className = "tx-row";
         row.dataset.id = t.id;
         var subParts = [];
-        if(t.card) subParts.push(escapeHtml(t.card));
+        // La carta si porta dietro il suo marchio: un badge piccolo davanti al
+        // nome si riconosce con un'occhiata, anche scorrendo la lista in fretta.
+        if(t.card) subParts.push('<span class="tx-card-tag">'+cardBadge(t.card, 14)+escapeHtml(t.card)+'</span>');
         if(t.note) subParts.push(escapeHtml(t.note));
         var recurringBadge = t.recurringId
           ? '<span class="tx-recurring-badge" title="Movimento ricorrente">'+ICONS.refresh+'</span>'
@@ -1014,7 +1024,7 @@
       var chip = document.createElement("button");
       chip.type = "button";
       chip.className = "card-select-chip" + (name===state.pendingCard ? " selected" : "");
-      chip.textContent = name;
+      chip.innerHTML = cardBadge(name, 18)+'<span>'+escapeHtml(name)+'</span>';
       chip.addEventListener("click", function(){
         state.pendingCard = name;
         refreshCardChips();
@@ -1570,7 +1580,7 @@
       var row = document.createElement("div");
       row.className = "cal-detail-row";
       var subParts = [];
-      if(t.card) subParts.push(escapeHtml(t.card));
+      if(t.card) subParts.push('<span class="tx-card-tag">'+cardBadge(t.card, 14)+escapeHtml(t.card)+'</span>');
       if(t.note) subParts.push(escapeHtml(t.note));
       row.innerHTML =
         '<div class="tx-icon" style="width:28px;height:28px;font-size:13px;background:'+cat.color+'26;">'+cat.icon+'</div>' +
@@ -1968,12 +1978,12 @@
     list.innerHTML = "";
     var fixedRow = document.createElement("div");
     fixedRow.className = "card-row";
-    fixedRow.innerHTML = '<div class="card-chip-icon">'+ICONS.cash+'</div><div class="card-name">Contanti</div>';
+    fixedRow.innerHTML = cardBadge("Contanti", 30)+'<div class="card-name">Contanti</div>';
     list.appendChild(fixedRow);
     state.customCards.forEach(function(name, idx){
       var row = document.createElement("div");
       row.className = "card-row";
-      row.innerHTML = '<div class="card-chip-icon">'+ICONS.card+'</div><div class="card-name">'+escapeHtml(name)+'</div>';
+      row.innerHTML = cardBadge(name, 30)+'<div class="card-name">'+escapeHtml(name)+'</div>';
       var removeBtn = document.createElement("button");
       removeBtn.className = "card-remove";
       removeBtn.textContent = "\u2715";
