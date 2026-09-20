@@ -32,7 +32,11 @@
   SVG disegnati a mano, non immagini scaricate: niente marchi registrati e nessuna
   dipendenza dalla rete.
 - **Conversione valuta** integrata, tramite API di cambio gratuita e senza chiave.
-- **Esportazione dati** in JSON per backup personale.
+- **Backup completo** in JSON: non solo i movimenti, ma anche carte, budget,
+  obiettivo di risparmio, movimenti ricorrenti e stato del riepilogo. L'importazione
+  legge ancora i backup vecchi, quelli col solo elenco dei movimenti.
+- **Conferma prima di eliminare**: togliere una carta o interrompere una
+  ricorrenza passa da un foglio di conferma, come cancellare un movimento.
 - Installabile come app, con funzionamento offline.
 
 ## Privacy e dati
@@ -40,7 +44,7 @@
 - Nessuna registrazione, nessun account.
 - Nessun tracciamento e nessuna raccolta dati personali.
 - Tutti i movimenti restano sul dispositivo, salvati in `localStorage`.
-- Esportazione manuale in JSON, sempre sotto il tuo controllo.
+- Esportazione manuale in JSON, sempre sotto il tuo controllo: il file contiene tutto quello che serve a rimettere in piedi l'app su un altro telefono.
 
 ## Tecnologie
 
