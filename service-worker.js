@@ -2,7 +2,7 @@
 // Alza questo numero a ogni pubblicazione: e' il cambiamento di questo file che
 // fa accorgere il browser che c'e' una versione nuova, e quindi fa comparire
 // l'avviso "Nuova versione disponibile" (vedi js/pwa-shell.js).
-var CACHE_NAME = "mymoney-v8";
+var CACHE_NAME = "mymoney-v9";
 var CORE_ASSETS = [
   "./",
   "./index.html",
@@ -18,7 +18,10 @@ var CORE_ASSETS = [
   "./icons/icon-180.png",
   "./icons/icon-192.png",
   "./icons/icon-384.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
+  "./icons/favicon-32.png",
+  "./icons/favicon-16.png"
 ];
 
 // Niente skipWaiting() qui: la versione nuova resta "in attesa" finche' non e'
