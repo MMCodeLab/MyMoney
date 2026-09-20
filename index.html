@@ -1351,8 +1351,25 @@
   });
 
   // ---------- gestione dati (dentro Impostazioni) ----------
+  // Il backup non e' piu' il solo elenco dei movimenti: carte, budget,
+  // obiettivo di risparmio, abbonamenti e stato del riepilogo vivono in chiavi
+  // separate di localStorage, e senza di loro un ripristino su un telefono
+  // nuovo riportava indietro i soldi ma non il modo in cui li avevi organizzati.
+  function buildBackup(){
+    return {
+      app: "mymoney",
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      transactions: state.transactions,
+      customCards: state.customCards,
+      recurringRules: state.recurringRules,
+      budgets: state.budgets,
+      savingsGoal: loadSavingsGoal(),
+      recap: loadRecapState()
+    };
+  }
   document.getElementById("exportBtn").addEventListener("click", function(){
-    var blob = new Blob([JSON.stringify(state.transactions, null, 2)], {type:"application/json"});
+    var blob = new Blob([JSON.stringify(buildBackup(), null, 2)], {type:"application/json"});
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
@@ -1380,12 +1397,27 @@
     reader.onload = function(){
       try{
         var data = JSON.parse(reader.result);
-        if(!Array.isArray(data)) throw new Error("formato non valido");
-        var valid = data.every(function(t){ return t && t.id && t.type && t.categoryId && typeof t.amount==="number" && t.date; });
+        // I backup fatti prima della versione 2 erano il semplice array dei
+        // movimenti: vanno ancora letti, altrimenti i file gia' salvati sul
+        // telefono diventerebbero carta straccia.
+        var backup = Array.isArray(data) ? { transactions: data } : data;
+        if(!backup || typeof backup !== "object" || !Array.isArray(backup.transactions)) throw new Error("formato non valido");
+        var valid = backup.transactions.every(function(t){ return t && t.id && t.type && t.categoryId && typeof t.amount==="number" && t.date; });
         if(!valid) throw new Error("formato non valido");
-        state.transactions = data;
+
+        state.transactions = backup.transactions;
         saveTransactions();
-        renderAll();
+        if(Array.isArray(backup.customCards)){ state.customCards = backup.customCards; saveCustomCards(); }
+        if(Array.isArray(backup.recurringRules)){ state.recurringRules = backup.recurringRules; saveRecurringRules(); }
+        if(backup.budgets && typeof backup.budgets === "object"){ state.budgets = backup.budgets; saveBudgets(); }
+        if(typeof backup.savingsGoal === "number") saveSavingsGoal(backup.savingsGoal);
+        if(backup.recap && typeof backup.recap === "object") saveRecapState(backup.recap);
+
+        // Ricaricare e' piu' sicuro di un renderAll(): obiettivo di risparmio,
+        // elenco delle carte e campi dei budget vengono letti quando le
+        // rispettive schermate si aprono, quindi con un semplice ridisegno
+        // resterebbero fermi ai valori di prima dell'import.
+        location.reload();
       }catch(e){
         alert("Il file selezionato non è un backup valido.");
       }
