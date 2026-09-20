@@ -160,6 +160,11 @@
   <div class="action-sheet-card"><button class="action-cancel" id="deleteCancel">Annulla</button></div>
 </div>
 
+<div class="action-sheet" id="confirmSheet">
+  <div class="action-sheet-card"><button class="action-danger" id="confirmSheetOk">Conferma</button></div>
+  <div class="action-sheet-card"><button class="action-cancel" id="confirmSheetCancel">Annulla</button></div>
+</div>
+
 <div class="calendar-popup" id="calendarPopup">
   <div class="calendar-header">
     <button id="calPrevMonth" aria-label="Mese precedente">&#8249;</button>
@@ -402,6 +407,7 @@
     pendingCard: "Contanti",
     pendingFrequency: "none",
     pendingDeleteId: null,
+    pendingConfirm: null,
     detailType: null,
     customCards: [],
     recurringRules: [],
@@ -879,6 +885,7 @@
     closeFabPanel();
     closeSheet();
     document.getElementById("deleteSheet").classList.remove("show");
+    document.getElementById("confirmSheet").classList.remove("show");
     document.getElementById("settingsSheet").classList.remove("show");
     document.getElementById("recapSheet").classList.remove("show");
     document.getElementById("calendarPopup").classList.remove("show");
@@ -1343,6 +1350,27 @@
     activeOverlay = "delete";
   }
   document.getElementById("deleteCancel").addEventListener("click", closeAllOverlays);
+
+  // Conferma generica per le azioni che tolgono qualcosa dalle Impostazioni.
+  // Sta su un foglio a parte perche' si apre sopra le Impostazioni, che restano
+  // aperte dietro: chiudere tutto e farle riaprire a mano sarebbe scomodo.
+  var confirmSheet = document.getElementById("confirmSheet");
+  var confirmSheetOk = document.getElementById("confirmSheetOk");
+  function askConfirm(label, onConfirm){
+    state.pendingConfirm = onConfirm;
+    confirmSheetOk.textContent = label;
+    confirmSheet.classList.add("show");
+  }
+  function closeConfirmSheet(){
+    confirmSheet.classList.remove("show");
+    state.pendingConfirm = null;
+  }
+  document.getElementById("confirmSheetCancel").addEventListener("click", closeConfirmSheet);
+  confirmSheetOk.addEventListener("click", function(){
+    var action = state.pendingConfirm;
+    closeConfirmSheet();
+    if(action) action();
+  });
   document.getElementById("deleteConfirm").addEventListener("click", function(){
     state.transactions = state.transactions.filter(function(t){ return t.id!==state.pendingDeleteId; });
     saveTransactions();
@@ -2028,10 +2056,19 @@
       var removeBtn = document.createElement("button");
       removeBtn.className = "card-remove";
       removeBtn.textContent = "\u2715";
+      removeBtn.setAttribute("aria-label", "Rimuovi la carta " + name);
+      // Una carta tolta per sbaglio va riscritta a mano con lo stesso nome,
+      // altrimenti i movimenti gia' registrati restano legati a una carta che
+      // non compare piu' nell'elenco: si passa dalla conferma, come altrove.
       removeBtn.addEventListener("click", function(){
-        state.customCards.splice(idx, 1);
-        saveCustomCards();
-        renderCardsList();
+        askConfirm("Rimuovi " + String.fromCharCode(171) + name + String.fromCharCode(187), function(){
+          var i = state.customCards.indexOf(name);
+          if(i !== -1){
+            state.customCards.splice(i, 1);
+            saveCustomCards();
+            renderCardsList();
+          }
+        });
       });
       row.appendChild(removeBtn);
       list.appendChild(row);
@@ -2062,9 +2099,13 @@
       stopBtn.textContent = "✕";
       stopBtn.setAttribute("aria-label", "Interrompi movimento ricorrente");
       stopBtn.addEventListener("click", function(){
-        rule.active = false;
-        saveRecurringRules();
-        renderRecurringList();
+        // Interrompere una ricorrenza e' definitivo quanto cancellarla: la
+        // regola sparisce dall'elenco e va ricreata da zero.
+        askConfirm("Interrompi la ricorrenza", function(){
+          rule.active = false;
+          saveRecurringRules();
+          renderRecurringList();
+        });
       });
       row.appendChild(stopBtn);
       list.appendChild(row);

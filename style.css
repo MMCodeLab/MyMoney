@@ -624,6 +624,11 @@
   .action-sheet-card button:last-child{ border-bottom:0; }
   .action-sheet-card button.action-danger{ color:var(--red); font-weight:700; }
   .action-sheet-card button.action-cancel{ font-weight:700; color:var(--text); }
+  /* La conferma si apre sopra le Impostazioni, che hanno lo stesso z-index e
+     vengono dopo nel documento: senza questo strato in piu' resterebbe
+     nascosta dietro il pannello e sembrerebbe che il tocco non abbia fatto
+     niente. */
+  #confirmSheet{ z-index:90; }
   .divider{ height:1px; background:var(--hairline); }
 
   /* ---------- Detail view (opened by tapping a chart) ---------- */
